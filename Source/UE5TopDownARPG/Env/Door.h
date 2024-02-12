@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseTrigger.h"
-#include "WinTrigger.generated.h"
+#include "../Trigger/BaseTrigger.h"
+#include "Door.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE5TOPDOWNARPG_API AWinTrigger : public ABaseTrigger
+class UE5TOPDOWNARPG_API ADoorTrigger : public ABaseTrigger
 {
 	GENERATED_BODY()
 
