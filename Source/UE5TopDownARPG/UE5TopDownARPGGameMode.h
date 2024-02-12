@@ -16,6 +16,10 @@ public:
 
 	void EndGame(bool IsWin);
 
+	void generateMaze(TArray<TArray<char>>& maze);
+
+	void spawnMaze(const TArray<TArray<char>>& maze);
+
 	void StartPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)

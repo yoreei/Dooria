@@ -38,23 +38,54 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
+void AUE5TopDownARPGGameMode::generateMaze(TArray<TArray<char>>& maze)
+{
+	int32 rows = 28;
+	int32 cols = 32;
+	maze.Empty(); // Clear existing data
+	maze.SetNum(rows); // Set number of rows
+
+	for (int32 i = 0; i < rows; ++i) {
+		maze[i].SetNum(cols); // Set number of columns for each row
+		for (int32 j = 0; j < cols; ++j) {
+			if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
+				maze[i][j] = 'W'; // Wall
+			}
+			else {
+				maze[i][j] = '.'; // Empty space
+			}
+		}
+	}
+}
+
+void AUE5TopDownARPGGameMode::spawnMaze(const TArray<TArray<char>>& maze)
+{
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	const float CellSize = 100.0f; // Unreal units per cell
+
+	for (int32 i = 0; i < maze.Num(); ++i) {
+		for (int32 j = 0; j < maze[i].Num(); ++j) {
+			if (maze[i][j] == 'W') {
+				FVector Location(j * CellSize, i * CellSize, 0.f);
+				FRotator Rotation(0.f, 0.f, 0.f);
+				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WallClass, Location, Rotation, SpawnParameters);
+				ensure(SpawnedActor); // Ensure the actor was spawned
+			}
+		}
+	}
+}
+
+
+
 void AUE5TopDownARPGGameMode::StartPlay()
 {
 	Super::StartPlay();
 
 	UWorld* pWorld = GetWorld();
 	ensure(pWorld);
-
-	generateMaze();
-
-	spawnMaze();
-
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	FVector Location{ 0.f,0.f,0.f };
-	FRotator Rotation{0.f,0.f,0.f};
-	AActor* SpawnedActor = GetWorld()->SpawnActor(WallClass, &Location, &Rotation, SpawnParameters);
-
-	ensure(SpawnedActor);
+	TArray<TArray<char>> maze;
+	generateMaze(maze);
+	spawnMaze(maze);
 }
