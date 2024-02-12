@@ -6,6 +6,116 @@
 #include "UObject/ConstructorHelpers.h"
 #include "UE5TopDownARPG.h"
 
+#include "CoreMinimal.h"
+#include <cstdlib> // For srand() and rand()
+#include <ctime> // For time
+
+using FCell = TPair<int32, int32>;
+template<typename T>
+using TStack = TArray<T>;
+
+// Initialize the maze with walls ('#') and cells (' ')
+void InitializeMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
+    maze.Empty();
+    maze.Reserve(rows);
+    for (int32 i = 0; i < rows; ++i) {
+        TArray<TCHAR> row;
+        row.Reserve(cols);
+        for (int32 j = 0; j < cols; ++j) {
+            row.Add(i % 2 != 0 && j % 2 != 0 ? ' ' : '#');
+        }
+        maze.Add(row);
+    }
+}
+
+// Check if a cell is valid and unvisited
+bool IsValidCell(int32 row, int32 col, int32 rows, int32 cols, const TArray<TArray<TCHAR>>& maze) {
+    return row >= 1 && row < rows && col >= 1 && col < cols && maze[row][col] == ' ';
+}
+
+// Get all unvisited neighbors of a cell
+TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, const TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
+    TArray<FCell> neighbors;
+    const int32 directions[4][2] = { {0, 2}, {2, 0}, {0, -2}, {-2, 0} };
+
+    for (const auto& dir : directions) {
+        int32 newRow = cell.Key + dir[0], newCol = cell.Value + dir[1];
+        if (IsValidCell(newRow, newCol, rows, cols, maze)) {
+            neighbors.Add(FCell(newRow, newCol));
+        }
+    }
+    return neighbors;
+}
+
+// Remove the wall between two cells
+void RemoveWall(FCell& current, FCell& next, TArray<TArray<TCHAR>>& maze) {
+    int32 wallRow = (current.Key + next.Key) / 2;
+    int32 wallCol = (current.Value + next.Value) / 2;
+    maze[wallRow][wallCol] = ' ';
+}
+
+// Randomly select perimeter points
+void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num) {
+    srand(static_cast<unsigned>(time(nullptr)));
+
+    TArray<FCell> perimPositions;
+    for (int32 col = 1; col < cols; col += 2) {
+        perimPositions.Add(FCell(0, col));
+        perimPositions.Add(FCell(rows - 1, col));
+    }
+    for (int32 row = 1; row < rows; row += 2) {
+        perimPositions.Add(FCell(row, 0));
+        perimPositions.Add(FCell(row, cols - 1));
+    }
+
+    num = FMath::Min(num, perimPositions.Num());
+    while (output.Num() < num) {
+        int32 randIndex = FMath::RandRange(0, perimPositions.Num() - 1);
+        if (!output.Contains(perimPositions[randIndex])) {
+            output.Add(perimPositions[randIndex]);
+        }
+    }
+}
+
+// Depth-First Search with Backtracking to generate maze paths
+void GenerateMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
+    srand(time(nullptr)); // Seed random number generator
+    TStack<FCell> stack;
+    TArray<FCell> doors;
+
+    maze[1][1] = 'V';
+    stack.Push(FCell(1, 1));
+
+    while (!stack.IsEmpty()) {
+        FCell currentCell = stack.Pop();
+
+        auto neighbors = GetUnvisitedNeighbors(currentCell, maze, rows, cols);
+        if (neighbors.Num() > 0) {
+            stack.Push(currentCell); // Push current cell back to stack
+
+            FCell chosenNeighbor = neighbors[FMath::RandRange(0, neighbors.Num() - 1)];
+            RemoveWall(currentCell, chosenNeighbor, maze);
+            maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
+            stack.Push(chosenNeighbor);
+        }
+    }
+
+    // Reset visited cells to empty spaces
+    for (int32 i = 1; i < rows; i += 2) {
+        for (int32 j = 1; j < cols; j += 2) {
+            if (maze[i][j] == 'V') maze[i][j] = ' ';
+        }
+    }
+
+    GetRandPerimPoints(rows, cols, doors, 4);
+
+    int32 doorIdx = 0;
+    for (const auto& door : doors) {
+        maze[door.Key][door.Value] = '0' + TCHAR(doorIdx);
+        doorIdx++;
+    }
+}
+
 AUE5TopDownARPGGameMode::AUE5TopDownARPGGameMode()
 {
 	// use our custom PlayerController class
@@ -38,26 +148,6 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
-void AUE5TopDownARPGGameMode::generateMaze(TArray<TArray<char>>& maze)
-{
-	int32 rows = 28;
-	int32 cols = 32;
-	maze.Empty(); // Clear existing data
-	maze.SetNum(rows); // Set number of rows
-
-	for (int32 i = 0; i < rows; ++i) {
-		maze[i].SetNum(cols); // Set number of columns for each row
-		for (int32 j = 0; j < cols; ++j) {
-			if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
-				maze[i][j] = 'W'; // Wall
-			}
-			else {
-				maze[i][j] = '.'; // Empty space
-			}
-		}
-	}
-}
-
 void AUE5TopDownARPGGameMode::spawnMaze(const TArray<TArray<char>>& maze)
 {
 	FActorSpawnParameters SpawnParameters;
@@ -85,7 +175,25 @@ void AUE5TopDownARPGGameMode::StartPlay()
 
 	UWorld* pWorld = GetWorld();
 	ensure(pWorld);
-	TArray<TArray<char>> maze;
-	generateMaze(maze);
-	spawnMaze(maze);
+
+    int32 rows = 21; // Must be odd
+    int32 cols = 21; // Must be odd
+    TArray<TArray<TCHAR>> maze;
+
+    InitializeMaze(maze, rows, cols);
+    GenerateMaze(maze, rows, cols);
+
+    // Print the maze
+    for (const auto& row : maze) {
+        FString RowString;
+        for (TCHAR cell : row) {
+            RowString += FString::Printf(TEXT("%c"), cell);
+        }
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
+    }
+
+    //spawnmaze
 }
+
+
+
