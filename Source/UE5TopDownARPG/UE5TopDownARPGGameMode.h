@@ -16,9 +16,9 @@ public:
 
 	void EndGame(bool IsWin);
 
-	void generateMaze(TArray<TArray<char>>& maze);
+	//void GenerateMaze(TArray<TArray<char>>& maze);
 
-	void spawnMaze(const TArray<TArray<char>>& maze);
+	void SpawnMaze(const TArray<TArray<TCHAR>>& maze);
 
 	void StartPlay() override;
 

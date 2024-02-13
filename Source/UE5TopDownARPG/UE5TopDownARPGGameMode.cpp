@@ -148,7 +148,7 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
-void AUE5TopDownARPGGameMode::spawnMaze(const TArray<TArray<char>>& maze)
+void AUE5TopDownARPGGameMode::SpawnMaze(const TArray<TArray<TCHAR>>& maze)
 {
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -157,12 +157,18 @@ void AUE5TopDownARPGGameMode::spawnMaze(const TArray<TArray<char>>& maze)
 
 	for (int32 i = 0; i < maze.Num(); ++i) {
 		for (int32 j = 0; j < maze[i].Num(); ++j) {
-			if (maze[i][j] == 'W') {
+			if (maze[i][j] == '#') {
 				FVector Location(j * CellSize, i * CellSize, 0.f);
 				FRotator Rotation(0.f, 0.f, 0.f);
 				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WallClass, Location, Rotation, SpawnParameters);
 				ensure(SpawnedActor); // Ensure the actor was spawned
 			}
+            else if (maze[i][j] == '0') {
+                //
+            }
+            else if (maze[i][j] >= '1' && maze[i][j] <= '9') {
+                //
+            }
 		}
 	}
 }
@@ -182,6 +188,7 @@ void AUE5TopDownARPGGameMode::StartPlay()
 
     InitializeMaze(maze, rows, cols);
     GenerateMaze(maze, rows, cols);
+    SpawnMaze(maze);
 
     // Print the maze
     for (const auto& row : maze) {
