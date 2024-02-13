@@ -13,37 +13,38 @@
 #include <cstdlib> // For srand() and rand()
 #include <ctime> // For time
 
-using FCell = TPair<int32, int32>;
+
 template<typename T>
 using TStack = TArray<T>;
+const static float CellSize = 100.0f; // Unreal units per cell
 
-// Initialize the maze with walls ('#') and cells (' ')
-void InitializeMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
-    maze.Empty();
-    maze.Reserve(rows);
+// Initialize the Maze with walls ('#') and cells (' ')
+void AUE5TopDownARPGGameMode::InitializeMaze(int32 rows, int32 cols) {
+    Maze.Empty();
+    Maze.Reserve(rows);
     for (int32 i = 0; i < rows; ++i) {
         TArray<TCHAR> row;
         row.Reserve(cols);
         for (int32 j = 0; j < cols; ++j) {
             row.Add(i % 2 != 0 && j % 2 != 0 ? ' ' : '#');
         }
-        maze.Add(row);
+        Maze.Add(row);
     }
 }
 
 // Check if a cell is valid and unvisited
-bool IsValidCell(int32 row, int32 col, int32 rows, int32 cols, const TArray<TArray<TCHAR>>& maze) {
-    return row >= 1 && row < rows && col >= 1 && col < cols && maze[row][col] == ' ';
+bool AUE5TopDownARPGGameMode::IsValidCell(int32 row, int32 col, int32 rows, int32 cols) {
+    return row >= 1 && row < rows && col >= 1 && col < cols && Maze[row][col] == ' ';
 }
 
 // Get all unvisited neighbors of a cell
-TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, const TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
+TArray<FCell> AUE5TopDownARPGGameMode::GetUnvisitedNeighbors(const FCell& cell, int32 rows, int32 cols) {
     TArray<FCell> neighbors;
     const int32 directions[4][2] = { {0, 2}, {2, 0}, {0, -2}, {-2, 0} };
 
     for (const auto& dir : directions) {
         int32 newRow = cell.Key + dir[0], newCol = cell.Value + dir[1];
-        if (IsValidCell(newRow, newCol, rows, cols, maze)) {
+        if (IsValidCell(newRow, newCol, rows, cols)) {
             neighbors.Add(FCell(newRow, newCol));
         }
     }
@@ -51,14 +52,14 @@ TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, const TArray<TArray<TCHAR
 }
 
 // Remove the wall between two cells
-void RemoveWall(FCell& current, FCell& next, TArray<TArray<TCHAR>>& maze) {
+void AUE5TopDownARPGGameMode::RemoveWall(FCell& current, FCell& next) {
     int32 wallRow = (current.Key + next.Key) / 2;
     int32 wallCol = (current.Value + next.Value) / 2;
-    maze[wallRow][wallCol] = ' ';
+    Maze[wallRow][wallCol] = ' ';
 }
 
 // Randomly select perimeter points
-void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num) {
+void AUE5TopDownARPGGameMode::GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num) {
     srand(static_cast<unsigned>(time(nullptr)));
 
     TArray<FCell> perimPositions;
@@ -80,25 +81,25 @@ void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num
     }
 }
 
-// Depth-First Search with Backtracking to generate maze paths
-void GenerateMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
+// Depth-First Search with Backtracking to generate Maze paths
+void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
     srand(time(nullptr)); // Seed random number generator
     TStack<FCell> stack;
     TArray<FCell> doors;
 
-    maze[1][1] = 'V';
+    Maze[1][1] = 'V';
     stack.Push(FCell(1, 1));
 
     while (!stack.IsEmpty()) {
         FCell currentCell = stack.Pop();
 
-        auto neighbors = GetUnvisitedNeighbors(currentCell, maze, rows, cols);
+        auto neighbors = GetUnvisitedNeighbors(currentCell, rows, cols);
         if (neighbors.Num() > 0) {
             stack.Push(currentCell); // Push current cell back to stack
 
             FCell chosenNeighbor = neighbors[FMath::RandRange(0, neighbors.Num() - 1)];
-            RemoveWall(currentCell, chosenNeighbor, maze);
-            maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
+            RemoveWall(currentCell, chosenNeighbor);
+            Maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
             stack.Push(chosenNeighbor);
         }
     }
@@ -106,7 +107,7 @@ void GenerateMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
     // Reset visited cells to empty spaces
     for (int32 i = 1; i < rows; i += 2) {
         for (int32 j = 1; j < cols; j += 2) {
-            if (maze[i][j] == 'V') maze[i][j] = ' ';
+            if (Maze[i][j] == 'V') Maze[i][j] = ' ';
         }
     }
 
@@ -114,7 +115,7 @@ void GenerateMaze(TArray<TArray<TCHAR>>& maze, int32 rows, int32 cols) {
 
     int32 doorIdx = 0;
     for (const auto& door : doors) {
-        maze[door.Key][door.Value] = '0' + TCHAR(doorIdx);
+        Maze[door.Key][door.Value] = '0' + TCHAR(doorIdx);
         doorIdx++;
     }
 }
@@ -151,54 +152,43 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
-void AUE5TopDownARPGGameMode::SpawnMaze(const TArray<TArray<TCHAR>>& maze)
+void AUE5TopDownARPGGameMode::SpawnMaze()
 {
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	const float CellSize = 100.0f; // Unreal units per cell
-
-	for (int32 i = 0; i < maze.Num(); ++i) {
-		for (int32 j = 0; j < maze[i].Num(); ++j) {
-            FVector Location(j * CellSize, i * CellSize, 0.f);
-            FRotator Rotation(0.f, 0.f, 0.f);
-			if (maze[i][j] == '#') {
-				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WallClass, Location, Rotation, SpawnParameters);
-				ensure(SpawnedActor); // Ensure the actor was spawned
+	for (int32 i = 0; i < Maze.Num(); ++i) {
+		for (int32 j = 0; j < Maze[i].Num(); ++j) {
+			if (Maze[i][j] == '#') {
+                SpawnWallAtGridLoc(i, j);
 			}
-            else if (maze[i][j] == '0') {
+            else if (Maze[i][j] == '0') {
                 //
-                SpawnPlayerAtLocation(Location, Rotation);
+                SpawnPlayerAtGridLoc(i,j);
 
             }
-            else if (maze[i][j] >= '1' && maze[i][j] <= '9') {
-                //
+            else if (Maze[i][j] >= '1' && Maze[i][j] <= '9') {
+                SpawnDoorAtGridLoc(i,j);
             }
 		}
 	}
 }
 
-void AUE5TopDownARPGGameMode::SpawnPlayerAtLocation(const FVector& Location, const FRotator& Rotation)
+AActor* AUE5TopDownARPGGameMode::BasicSpawn(int i, int j, TSubclassOf<AActor> SpawnClass)
 {
-    // Path to your Blueprint character
-    FString BlueprintPath = TEXT("Blueprint'/Game/TopDown/Blueprints/BP_TopDownCharacter.BP_TopDownCharacter_C'");
+    FActorSpawnParameters SpawnParameters;
+    SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+    FVector Location = CalculateUELocation(i, j);
+    FRotator Rotation(0.f, 0.f, 0.f);
+    AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(SpawnClass, Location, Rotation, SpawnParameters);
+    return SpawnedActor;
+}
 
-    // Load the Blueprint class
-    UClass* BlueprintClass = StaticLoadClass(ACharacter::StaticClass(), nullptr, *BlueprintPath);
-    if (BlueprintClass == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot find Blueprint class at %s"), *BlueprintPath);
-        return;
-    }
+void AUE5TopDownARPGGameMode::SpawnWallAtGridLoc(int i, int j)
+{
+    AActor* Wall = BasicSpawn(i, j, WallClass);
+}
 
-    // Set up spawn parameters
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-    // Spawn the Blueprint character
-    ACharacter* SpawnedCharacter = GetWorld()->SpawnActor<ACharacter>(BlueprintClass, Location, Rotation, SpawnParams);
-
-    // Optional: Possess the spawned character with a player controller
+void AUE5TopDownARPGGameMode::SpawnPlayerAtGridLoc(int i, int j)
+{
+    ACharacter* SpawnedCharacter = Cast<ACharacter>(BasicSpawn(i, j, CharacterClass));
     if (SpawnedCharacter != nullptr)
     {
         APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
@@ -207,6 +197,48 @@ void AUE5TopDownARPGGameMode::SpawnPlayerAtLocation(const FVector& Location, con
             PlayerController->Possess(SpawnedCharacter);
         }
     }
+}
+
+void AUE5TopDownARPGGameMode::SpawnDoorAtGridLoc(int i, int j)
+{
+    AActor* Door = BasicSpawn(i, j, DoorClass);
+    FRotator Rotator = CalculateRotation(i, j);
+    Door->SetActorRotation(Rotator);
+    UE_LOG(LogTemp, Warning, TEXT("Door %s ; Rotation: %s"), *Door->GetActorNameOrLabel(), *Rotator.ToString());
+}
+
+FRotator AUE5TopDownARPGGameMode::CalculateRotation(int i, int j)
+{
+    if (Maze.Num() - 1 == i)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("rotation 0"));
+        return FRotator(0.f, 90.f, 0.f);
+    }
+    else if (Maze[0].Num() - 1 == j)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("rotation 90"));
+        return FRotator(0.f, 180.f, 0.f);
+    }
+    else if (0 == i)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("rotation 180"));
+        return FRotator(0.f, 270.f, 0.f);
+    }
+    else if (0 == j)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("rotation 270"));
+        return FRotator(0.f, 0.f, 0.f);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Won't Calculate Rotation for loc %d %d"), i, j);
+        return FRotator(0.f, 0.f, 0.f);
+    }
+}
+
+FVector AUE5TopDownARPGGameMode::CalculateUELocation(int i, int j)
+{
+    return FVector(i * CellSize, j * CellSize, 0);
 }
 
 
@@ -219,14 +251,13 @@ void AUE5TopDownARPGGameMode::StartPlay()
 
     int32 rows = 21; // Must be odd
     int32 cols = 21; // Must be odd
-    TArray<TArray<TCHAR>> maze;
 
-    InitializeMaze(maze, rows, cols);
-    GenerateMaze(maze, rows, cols);
-    SpawnMaze(maze);
+    InitializeMaze(rows, cols);
+    GenerateMaze(rows, cols);
+    SpawnMaze();
 
-    // Print the maze
-    for (const auto& row : maze) {
+    // Print the Maze
+    for (const auto& row : Maze) {
         FString RowString;
         for (TCHAR cell : row) {
             RowString += FString::Printf(TEXT("%c"), cell);
@@ -234,7 +265,6 @@ void AUE5TopDownARPGGameMode::StartPlay()
         UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
     }
 
-    //spawnmaze
 }
 
 
