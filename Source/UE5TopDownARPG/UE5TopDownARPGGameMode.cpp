@@ -6,6 +6,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "UE5TopDownARPG.h"
 
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "CoreMinimal.h"
 #include <cstdlib> // For srand() and rand()
 #include <ctime> // For time
@@ -157,14 +160,16 @@ void AUE5TopDownARPGGameMode::SpawnMaze(const TArray<TArray<TCHAR>>& maze)
 
 	for (int32 i = 0; i < maze.Num(); ++i) {
 		for (int32 j = 0; j < maze[i].Num(); ++j) {
+            FVector Location(j * CellSize, i * CellSize, 0.f);
+            FRotator Rotation(0.f, 0.f, 0.f);
 			if (maze[i][j] == '#') {
-				FVector Location(j * CellSize, i * CellSize, 0.f);
-				FRotator Rotation(0.f, 0.f, 0.f);
 				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WallClass, Location, Rotation, SpawnParameters);
 				ensure(SpawnedActor); // Ensure the actor was spawned
 			}
             else if (maze[i][j] == '0') {
                 //
+                SpawnPlayerAtLocation(Location, Rotation);
+
             }
             else if (maze[i][j] >= '1' && maze[i][j] <= '9') {
                 //
@@ -173,6 +178,36 @@ void AUE5TopDownARPGGameMode::SpawnMaze(const TArray<TArray<TCHAR>>& maze)
 	}
 }
 
+void AUE5TopDownARPGGameMode::SpawnPlayerAtLocation(const FVector& Location, const FRotator& Rotation)
+{
+    // Path to your Blueprint character
+    FString BlueprintPath = TEXT("Blueprint'/Game/TopDown/Blueprints/BP_TopDownCharacter.BP_TopDownCharacter_C'");
+
+    // Load the Blueprint class
+    UClass* BlueprintClass = StaticLoadClass(ACharacter::StaticClass(), nullptr, *BlueprintPath);
+    if (BlueprintClass == nullptr)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot find Blueprint class at %s"), *BlueprintPath);
+        return;
+    }
+
+    // Set up spawn parameters
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+    // Spawn the Blueprint character
+    ACharacter* SpawnedCharacter = GetWorld()->SpawnActor<ACharacter>(BlueprintClass, Location, Rotation, SpawnParams);
+
+    // Optional: Possess the spawned character with a player controller
+    if (SpawnedCharacter != nullptr)
+    {
+        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+        if (PlayerController)
+        {
+            PlayerController->Possess(SpawnedCharacter);
+        }
+    }
+}
 
 
 void AUE5TopDownARPGGameMode::StartPlay()

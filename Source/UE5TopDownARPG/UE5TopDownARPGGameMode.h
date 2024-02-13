@@ -20,6 +20,8 @@ public:
 
 	void SpawnMaze(const TArray<TArray<TCHAR>>& maze);
 
+	void SpawnPlayerAtLocation(const FVector& Location, const FRotator& Rotation);
+
 	void StartPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)
