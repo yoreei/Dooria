@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Env/Cell.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
 using FCell = TPair<int32, int32>;
@@ -16,7 +17,11 @@ class AUE5TopDownARPGGameMode : public AGameModeBase
 public:
 	AUE5TopDownARPGGameMode();
 
+	// GamePlay Methods 
+
 	void EndGame(bool IsWin);
+
+	// Generate Methods
 
 	void GenerateMaze(int32 rows, int32 cols);
 
@@ -30,24 +35,37 @@ public:
 
 	void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num);
 
+	// Spawn Methods
+
 	void SpawnMaze();
 
 	void SpawnPlayerAtGridLoc(int i, int j);
 
 	void SpawnDoorAtGridLoc(int i, int j);
 
-	void SpawnWallAtGridLoc(int i, int j);
+	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
+
+	ADooriaCell* SpawnCellAtGridLoc(int i, int j);
+
+	ADooriaPath* SpawnPathAtGridLoc(int i, int j);
 
 	AActor* BasicSpawn(int i, int j, TSubclassOf<AActor> SpawnClass);
 
 	FRotator CalculateRotation(int i, int j);
 
+	int32 CalculateWallTileType(int i, int j);
+
 	FVector CalculateUELocation(int i, int j);
+
+	// GameMode
 	
 	void StartPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> WallClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> CellClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CharacterClass;

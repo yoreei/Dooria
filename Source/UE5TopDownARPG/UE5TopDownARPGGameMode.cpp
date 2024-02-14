@@ -5,6 +5,8 @@
 #include "UE5TopDownARPGCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "UE5TopDownARPG.h"
+#include "Env/Cell.h"
+#include "Env/Door.h"
 
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,6 +14,7 @@
 #include "CoreMinimal.h"
 #include <cstdlib> // For srand() and rand()
 #include <ctime> // For time
+#include <map>
 
 
 template<typename T>
@@ -152,23 +155,98 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
+ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j)
+{
+    AActor* Actor = BasicSpawn(i, j, CellClass);
+    ADooriaCell* DooriaCell = Cast<ADooriaCell>(Actor);
+    if (ensure(DooriaCell))
+    {
+        DooriaCell->X = j;
+        DooriaCell->Y = i;
+    }
+    return DooriaCell;
+}
+
+ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
+{
+    ADooriaCell* Cell = SpawnCellAtGridLoc(i,j);
+    ADooriaPath* DooriaPath = Cast<ADooriaPath>(Cell);
+    if (ensure(DooriaPath))
+    {
+        int TileType = CalculateWallTileType(i, j);
+        DooriaPath->WallBitMask = TileType;
+    }
+    return DooriaPath;
+}
+
 void AUE5TopDownARPGGameMode::SpawnMaze()
 {
 	for (int32 i = 0; i < Maze.Num(); ++i) {
 		for (int32 j = 0; j < Maze[i].Num(); ++j) {
-			if (Maze[i][j] == '#') {
-                SpawnWallAtGridLoc(i, j);
-			}
+            if (Maze[i][j] == '#')
+            {
+                SpawnObstructionAtGridLoc(i, j);
+            }
+
+            else if (Maze[i][j] == ' ')
+            {
+                SpawnPathAtGridLoc(i, j);
+            }
+
             else if (Maze[i][j] == '0') {
-                //
+                SpawnPathAtGridLoc(i, j);
                 SpawnPlayerAtGridLoc(i,j);
 
             }
             else if (Maze[i][j] >= '1' && Maze[i][j] <= '9') {
+                SpawnPathAtGridLoc(i, j);
                 SpawnDoorAtGridLoc(i,j);
             }
 		}
 	}
+}
+
+int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
+{
+    enum Side : int {
+        NONE = 0b00000000,
+        N = 0b00000001,
+        NE = 0b00000010,
+        E = 0b00000100,
+        SE = 0b00001000,
+        S = 0b00010000,
+        SW = 0b00100000,
+        W = 0b01000000,
+        NW = 0b10000000
+    };
+
+    TMap<TPair<int32, int32>, Side> Dirs{
+        {{0, 1}, N},
+        {{1, 1}, NE},
+        {{1, 0}, E},
+        {{1, -1}, SE},
+        {{0, -1}, S},
+        {{-1, -1}, SW},
+        {{-1, 0}, W},
+        {{-1, 1}, NW}
+    };
+
+    int32 Result = NONE;
+
+    for (const auto& dir : Dirs) {
+        TPair<int32, int32> Coords = dir.Key;
+        Side BitValue = dir.Value;
+
+        int newI = i + Coords.Value;
+        int newJ = j + Coords.Key;
+        
+        if (!IsValidCell(newJ, newI, Maze[0].Num(), Maze.Num()) || Maze[newI][newJ] == '#')
+        {
+            Result += static_cast<int>(BitValue);
+        }
+    }
+
+    return Result;
 }
 
 AActor* AUE5TopDownARPGGameMode::BasicSpawn(int i, int j, TSubclassOf<AActor> SpawnClass)
@@ -181,15 +259,23 @@ AActor* AUE5TopDownARPGGameMode::BasicSpawn(int i, int j, TSubclassOf<AActor> Sp
     return SpawnedActor;
 }
 
-void AUE5TopDownARPGGameMode::SpawnWallAtGridLoc(int i, int j)
+ADooriaObstruction* AUE5TopDownARPGGameMode::SpawnObstructionAtGridLoc(int i, int j)
 {
-    AActor* Wall = BasicSpawn(i, j, WallClass);
+    AActor* Actor = BasicSpawn(i, j, WallClass);
+    ADooriaObstruction* Obstruction = Cast<ADooriaObstruction>(Actor);
+
+    if (ensure(Obstruction))
+    {
+        Obstruction->ObstructionType = EObstructionType::Wall;
+    }
+
+    return Obstruction;
 }
 
 void AUE5TopDownARPGGameMode::SpawnPlayerAtGridLoc(int i, int j)
 {
     ACharacter* SpawnedCharacter = Cast<ACharacter>(BasicSpawn(i, j, CharacterClass));
-    if (SpawnedCharacter != nullptr)
+    if (ensure(SpawnedCharacter))
     {
         APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
         if (PlayerController)
@@ -244,10 +330,8 @@ FVector AUE5TopDownARPGGameMode::CalculateUELocation(int i, int j)
 
 void AUE5TopDownARPGGameMode::StartPlay()
 {
-	Super::StartPlay();
-
-	UWorld* pWorld = GetWorld();
-	ensure(pWorld);
+    UWorld* pWorld = GetWorld();
+    ensure(pWorld);
 
     int32 rows = 21; // Must be odd
     int32 cols = 21; // Must be odd
@@ -264,6 +348,8 @@ void AUE5TopDownARPGGameMode::StartPlay()
         }
         UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
     }
+
+	Super::StartPlay();
 
 }
 
