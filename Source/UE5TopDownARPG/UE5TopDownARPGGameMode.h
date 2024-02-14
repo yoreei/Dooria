@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
+using FCell = TPair<int32, int32>;
+
 UCLASS(minimalapi)
 class AUE5TopDownARPGGameMode : public AGameModeBase
 {
@@ -16,16 +18,62 @@ public:
 
 	void EndGame(bool IsWin);
 
-	//void GenerateMaze(TArray<TArray<char>>& maze);
+	void GenerateMaze(int32 rows, int32 cols);
 
-	void SpawnMaze(const TArray<TArray<TCHAR>>& maze);
+	void InitializeMaze(int32 rows, int32 cols);
 
-	void SpawnPlayerAtLocation(const FVector& Location, const FRotator& Rotation);
+	bool IsValidCell(int32 row, int32 col, int32 rows, int32 cols);
 
+	TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, int32 rows, int32 cols);
+
+	void RemoveWall(FCell& current, FCell& next);
+
+	void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num);
+
+	void SpawnMaze();
+
+	void SpawnPlayerAtGridLoc(int i, int j);
+
+	void SpawnDoorAtGridLoc(int i, int j);
+
+	void SpawnWallAtGridLoc(int i, int j);
+
+	AActor* BasicSpawn(int i, int j, TSubclassOf<AActor> SpawnClass);
+
+	FRotator CalculateRotation(int i, int j);
+
+	FVector CalculateUELocation(int i, int j);
+	
 	void StartPlay() override;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> WallClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> CharacterClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> Friend1Class;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> Friend2Class;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> Enemy1Class;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> Enemy2Class;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> DoorClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> EdgeDecoClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	int32 MustOpenDoorsToWin = 3;
+
+	TArray<TArray<TCHAR>> Maze;
 };
 
 
