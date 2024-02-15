@@ -62,15 +62,18 @@ void AUE5TopDownARPGGameMode::RemoveWall(FCell& current, FCell& next) {
 }
 
 // Randomly select perimeter points
-void AUE5TopDownARPGGameMode::GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num) {
+void AUE5TopDownARPGGameMode::CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output) {
     srand(static_cast<unsigned>(time(nullptr)));
 
+    // TODO Do not assume that start is 0, cols/2
+
+    int32 cols = Maze.Num();
+    int32 rows = Maze[0].Num();
     TArray<FCell> perimPositions;
-    for (int32 col = 1; col < cols; col += 2) {
-        perimPositions.Add(FCell(0, col));
+    for (int32 col = 1; col < cols; col += 4) {
         perimPositions.Add(FCell(rows - 1, col));
     }
-    for (int32 row = 1; row < rows; row += 2) {
+    for (int32 row = rows/ 2; row < rows; row += 4) {
         perimPositions.Add(FCell(row, 0));
         perimPositions.Add(FCell(row, cols - 1));
     }
@@ -88,7 +91,6 @@ void AUE5TopDownARPGGameMode::GetRandPerimPoints(int32 rows, int32 cols, TArray<
 void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
     srand(time(nullptr)); // Seed random number generator
     TStack<FCell> stack;
-    TArray<FCell> doors;
 
     Maze[1][1] = 'V';
     stack.Push(FCell(1, 1));
@@ -114,13 +116,20 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         }
     }
 
-    GetRandPerimPoints(rows, cols, doors, 4);
+    // Generate Start
+    Maze[0][cols / 2] = '0';
 
-    int32 doorIdx = 0;
+    // Generate Doors
+    TArray<FCell> doors;
+    CalculateDoorLocations(FCell(0, cols / 2), 3, doors);
+
+    int32 doorIdx = 1;
     for (const auto& door : doors) {
-        Maze[door.Key][door.Value] = '0' + TCHAR(doorIdx);
+        Maze[door.Key][door.Value] = '0' + doorIdx;
         doorIdx++;
     }
+
+    // TODO Spawn Traps
 }
 
 AUE5TopDownARPGGameMode::AUE5TopDownARPGGameMode()
@@ -157,11 +166,8 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 
 ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass)
 {
-    UE_LOG(LogUE5TopDownARPG, Log, TEXT("SpawnClass: %s"), SpawnClass);
     AActor* Actor = BasicSpawn(i, j, SpawnClass);
-    UE_LOG(LogUE5TopDownARPG, Log, TEXT("%s"), Actor);
     ADooriaCell* DooriaCell = Cast<ADooriaCell>(Actor);
-    UE_LOG(LogUE5TopDownARPG, Log, TEXT("%s"), DooriaCell);
     if (ensure(DooriaCell))
     {
         DooriaCell->X = j;

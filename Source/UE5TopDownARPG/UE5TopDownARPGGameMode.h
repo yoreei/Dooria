@@ -7,8 +7,7 @@
 #include "Env/Cell.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
-using FCell = TPair<int32, int32>;
-
+using FCell = TPair<int32, int32>; // Key = Y, Value = X
 UCLASS(minimalapi)
 class AUE5TopDownARPGGameMode : public AGameModeBase
 {
@@ -33,7 +32,7 @@ public:
 
 	void RemoveWall(FCell& current, FCell& next);
 
-	void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num);
+	void CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output);
 
 	// Spawn Methods
 
