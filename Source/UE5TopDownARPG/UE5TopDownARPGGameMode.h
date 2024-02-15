@@ -42,6 +42,8 @@ public:
 
 	void SpawnDoorAtGridLoc(int i, int j);
 
+	void SpawnFloorTrapAtGridLoc(int i, int j);
+
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
 	ADooriaCell* SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass);
@@ -72,6 +74,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CharacterClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> SwordFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> FlameFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> GeiserFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> BoulderFloorTrapClass;
+	
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> Friend1Class;
 

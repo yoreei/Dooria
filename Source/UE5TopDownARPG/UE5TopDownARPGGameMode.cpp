@@ -7,6 +7,7 @@
 #include "UE5TopDownARPG.h"
 #include "Env/Cell.h"
 #include "Env/Door.h"
+#include "Trigger/FloorTrapTrigger.h"
 
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
@@ -63,8 +64,6 @@ void AUE5TopDownARPGGameMode::RemoveWall(FCell& current, FCell& next) {
 
 // Randomly select perimeter points
 void AUE5TopDownARPGGameMode::CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output) {
-    srand(static_cast<unsigned>(time(nullptr)));
-
     // TODO Do not assume that start is 0, cols/2
 
     int32 cols = Maze.Num();
@@ -89,7 +88,7 @@ void AUE5TopDownARPGGameMode::CalculateDoorLocations(FCell start, int32 num, TAr
 
 // Depth-First Search with Backtracking to generate Maze paths
 void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
-    srand(time(nullptr)); // Seed random number generator
+    srand(time(nullptr));
     TStack<FCell> stack;
 
     Maze[1][1] = 'V';
@@ -114,6 +113,19 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         for (int32 j = 1; j < cols; j += 2) {
             if (Maze[i][j] == 'V') Maze[i][j] = ' ';
         }
+    }
+
+    // Add Loops in Maze With Traps
+
+    for (int row = 2; row < Maze.Num(); row += 4)
+    {
+        int32 randCol;
+        do
+        {
+            randCol = FMath::RandRange(0, Maze[0].Num() - 1);
+        } while (Maze[row][randCol] != '#');
+
+        Maze[row][randCol] = 'T';
     }
 
     // Generate Start
@@ -188,6 +200,22 @@ ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
     return DooriaPath;
 }
 
+void AUE5TopDownARPGGameMode::SpawnFloorTrapAtGridLoc(int i, int j)
+{
+    TArray<TSubclassOf<AActor>> TrapType = { SwordFloorTrapClass, FlameFloorTrapClass, GeiserFloorTrapClass, BoulderFloorTrapClass };
+    int32 RandIdx = FMath::RandRange(0, TrapType.Num() - 1);
+    auto RandTrapClass = TrapType[RandIdx];
+
+    AActor* Actor = BasicSpawn(i, j, TrapType[RandIdx]);
+    AFloorTrapTrigger* Trap = Cast<AFloorTrapTrigger>(Actor);
+    if (ensure(Trap))
+    {
+        FRotator Rotator = CalculateRotation(i, j);
+        Trap->SetActorRotation(Rotator);
+        UE_LOG(LogTemp, Warning, TEXT("Spawning Trap %s"), *Trap->GetActorNameOrLabel());
+    }
+}
+
 void AUE5TopDownARPGGameMode::SpawnMaze()
 {
 	for (int32 i = 0; i < Maze.Num(); ++i) {
@@ -210,6 +238,11 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
             else if (Maze[i][j] >= '1' && Maze[i][j] <= '9') {
                 SpawnPathAtGridLoc(i, j);
                 SpawnDoorAtGridLoc(i,j);
+            }
+
+            else if (Maze[i][j] == 'T') {
+                SpawnPathAtGridLoc(i, j);
+                SpawnFloorTrapAtGridLoc(i, j);
             }
 		}
 	}
@@ -331,6 +364,7 @@ FVector AUE5TopDownARPGGameMode::CalculateUELocation(int i, int j)
 
 void AUE5TopDownARPGGameMode::StartPlay()
 {
+    srand(static_cast<unsigned>(time(nullptr)));
     UWorld* pWorld = GetWorld();
     ensure(pWorld);
 
