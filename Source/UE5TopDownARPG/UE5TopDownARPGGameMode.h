@@ -45,7 +45,7 @@ public:
 
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
-	ADooriaCell* SpawnCellAtGridLoc(int i, int j);
+	ADooriaCell* SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass);
 
 	ADooriaPath* SpawnPathAtGridLoc(int i, int j);
 
@@ -65,28 +65,28 @@ public:
 	TSubclassOf<AActor> WallClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> CellClass;
+	TSubclassOf<AActor> DoorClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> PathClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CharacterClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> Friend1Class;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> Friend1Class;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> Friend2Class;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> Friend2Class;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> Enemy1Class;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> Enemy1Class;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> Enemy2Class;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> Enemy2Class;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> DoorClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> EdgeDecoClass;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> EdgeDecoClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	int32 MustOpenDoorsToWin = 3;

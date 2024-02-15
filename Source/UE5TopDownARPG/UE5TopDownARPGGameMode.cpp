@@ -35,9 +35,9 @@ void AUE5TopDownARPGGameMode::InitializeMaze(int32 rows, int32 cols) {
     }
 }
 
-// Check if a cell is valid and unvisited
+// Check if a cell is within bounds
 bool AUE5TopDownARPGGameMode::IsValidCell(int32 row, int32 col, int32 rows, int32 cols) {
-    return row >= 1 && row < rows && col >= 1 && col < cols && Maze[row][col] == ' ';
+    return row >= 1 && row < rows && col >= 1 && col < cols;
 }
 
 // Get all unvisited neighbors of a cell
@@ -47,7 +47,7 @@ TArray<FCell> AUE5TopDownARPGGameMode::GetUnvisitedNeighbors(const FCell& cell, 
 
     for (const auto& dir : directions) {
         int32 newRow = cell.Key + dir[0], newCol = cell.Value + dir[1];
-        if (IsValidCell(newRow, newCol, rows, cols)) {
+        if (IsValidCell(newRow, newCol, rows, cols) && Maze[newRow][newCol] == ' ') {
             neighbors.Add(FCell(newRow, newCol));
         }
     }
@@ -155,10 +155,13 @@ void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
 	}
 }
 
-ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j)
+ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass)
 {
-    AActor* Actor = BasicSpawn(i, j, CellClass);
+    UE_LOG(LogUE5TopDownARPG, Log, TEXT("SpawnClass: %s"), SpawnClass);
+    AActor* Actor = BasicSpawn(i, j, SpawnClass);
+    UE_LOG(LogUE5TopDownARPG, Log, TEXT("%s"), Actor);
     ADooriaCell* DooriaCell = Cast<ADooriaCell>(Actor);
+    UE_LOG(LogUE5TopDownARPG, Log, TEXT("%s"), DooriaCell);
     if (ensure(DooriaCell))
     {
         DooriaCell->X = j;
@@ -169,12 +172,12 @@ ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j)
 
 ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
 {
-    ADooriaCell* Cell = SpawnCellAtGridLoc(i,j);
+    ADooriaCell* Cell = SpawnCellAtGridLoc(i,j, PathClass);
     ADooriaPath* DooriaPath = Cast<ADooriaPath>(Cell);
     if (ensure(DooriaPath))
     {
         int TileType = CalculateWallTileType(i, j);
-        DooriaPath->WallBitMask = TileType;
+        DooriaPath->setWallBitMask(TileType);
     }
     return DooriaPath;
 }
@@ -208,30 +211,18 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
 
 int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
 {
-    enum Side : int {
-        NONE = 0b00000000,
-        N = 0b00000001,
-        NE = 0b00000010,
-        E = 0b00000100,
-        SE = 0b00001000,
-        S = 0b00010000,
-        SW = 0b00100000,
-        W = 0b01000000,
-        NW = 0b10000000
-    };
-
     TMap<TPair<int32, int32>, Side> Dirs{
-        {{0, 1}, N},
-        {{1, 1}, NE},
-        {{1, 0}, E},
-        {{1, -1}, SE},
-        {{0, -1}, S},
-        {{-1, -1}, SW},
-        {{-1, 0}, W},
-        {{-1, 1}, NW}
+        {{0, 1}, Side::N},
+        {{1, 1}, Side::NE},
+        {{1, 0}, Side::E},
+        {{1, -1}, Side::SE},
+        {{0, -1}, Side::S},
+        {{-1, -1}, Side::SW},
+        {{-1, 0}, Side::W},
+        {{-1, 1}, Side::NW}
     };
 
-    int32 Result = NONE;
+    int32 Result = 0;
 
     for (const auto& dir : Dirs) {
         TPair<int32, int32> Coords = dir.Key;
@@ -261,7 +252,7 @@ AActor* AUE5TopDownARPGGameMode::BasicSpawn(int i, int j, TSubclassOf<AActor> Sp
 
 ADooriaObstruction* AUE5TopDownARPGGameMode::SpawnObstructionAtGridLoc(int i, int j)
 {
-    AActor* Actor = BasicSpawn(i, j, WallClass);
+    AActor* Actor = SpawnCellAtGridLoc(i, j, WallClass);
     ADooriaObstruction* Obstruction = Cast<ADooriaObstruction>(Actor);
 
     if (ensure(Obstruction))
@@ -287,10 +278,14 @@ void AUE5TopDownARPGGameMode::SpawnPlayerAtGridLoc(int i, int j)
 
 void AUE5TopDownARPGGameMode::SpawnDoorAtGridLoc(int i, int j)
 {
-    AActor* Door = BasicSpawn(i, j, DoorClass);
-    FRotator Rotator = CalculateRotation(i, j);
-    Door->SetActorRotation(Rotator);
-    UE_LOG(LogTemp, Warning, TEXT("Door %s ; Rotation: %s"), *Door->GetActorNameOrLabel(), *Rotator.ToString());
+    AActor* Actor = BasicSpawn(i, j, DoorClass);
+    ADoorTrigger* Door = Cast<ADoorTrigger>(Actor);
+    if (ensure(Door))
+    {
+        FRotator Rotator = CalculateRotation(i, j);
+        Door->SetActorRotation(Rotator);
+        UE_LOG(LogTemp, Warning, TEXT("Door %s ; Rotation: %s"), *Door->GetActorNameOrLabel(), *Rotator.ToString());
+    }
 }
 
 FRotator AUE5TopDownARPGGameMode::CalculateRotation(int i, int j)

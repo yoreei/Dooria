@@ -4,7 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Engine/StaticMeshActor.h"
+#include "Containers/BitArray.h"
 #include "Cell.generated.h"
+
+enum class Side : int32 {
+	NONE = 0b00000000,
+	N = 0b00000001,
+	NE = 0b00000010,
+	E = 0b00000100,
+	SE = 0b00001000,
+	S = 0b00010000,
+	SW = 0b00100000,
+	W = 0b01000000,
+	NW = 0b10000000
+};
 
 UCLASS(Blueprintable)
 class ADooriaCell : public AStaticMeshActor
@@ -44,57 +57,52 @@ class ADooriaPath : public ADooriaCell
 	GENERATED_BODY()
 
 public:
-	/*
-000001 - TopLeft (1)
-000010 - TopRight (2)
-000011 - TopLeftRight (3)
-000100 - BottomRight (4)
-000101 - TopLeftBottomRight (5)
-000110 - TopRightBottomRight (6)
-000111 - (7)
-001000 - (8)
-001001 - (9)
-001010 - (10)
-001011 - (11)
-001100 - (12)
-001101 - (13)
-001110 - (14)
-001111 - (15)
-010000 - (16)
-010001 - (17)
-010010 - (18)
-010011 - (19)
-010100 - (20)
-010101 - (21)
-010110 - (22)
-010111 - (23)
-011000 - (24)
-011001 - (25)
-011010 - (26)
-011011 - (27)
-011100 - (28)
-011101 - (29)
-011110 - (30)
-011111 - (31)
-100000 - (32)
-100001 - (33)
-100010 - (34)
-100011 - (35)
-100100 - (36)
-100101 - (37)
-100110 - (38)
-100111 - (39)
-101000 - (40)
-101001 - (41)
-101010 - (42)
-101011 - (43)
-101100 - (44)
-101101 - (45)
-101110 - (46)
-101111 - (47)
-110000 - (48)
 
+	// Setters
+
+	void setWallBitMask(int Val);
+
+	/*
+		NONE = 0b 0000 0000,
+		N =    0b 0000 0001,
+		NE =   0b 0000 0010,
+		E =    0b 0000 0100,
+		SE =   0b 0000 1000,
+		S =    0b 0001 0000,
+		SW =   0b 0010 0000,
+		W =    0b 0100 0000,
+		NW =   0b 1000 0000
 	*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
-	int32 WallBitMask;
+	int32 WallBitMaskDec;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	//std::bitset<32> WallBitMaskBin;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	FString WallBitMaskBin;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool N;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool NE;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool E;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool SE;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool S;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool SW;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool W;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool NW;
 };
