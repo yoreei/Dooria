@@ -39,7 +39,11 @@ void AUE5TopDownARPGGameMode::InitializeMaze(int32 rows, int32 cols) {
 
 // Check if a cell is within bounds
 bool AUE5TopDownARPGGameMode::IsValidCell(int32 row, int32 col, int32 rows, int32 cols) {
-    return row >= 1 && row < rows && col >= 1 && col < cols;
+    return row >= 0 && row < rows && col >= 0 && col < cols;
+}
+
+bool AUE5TopDownARPGGameMode::IsInMaze(int32 row, int32 col, int32 rows, int32 cols) {
+    return row >= 1 && row < rows - 1 && col >= 1 && col < cols - 1;
 }
 
 // Get all unvisited neighbors of a cell
@@ -49,7 +53,7 @@ TArray<FCell> AUE5TopDownARPGGameMode::GetUnvisitedNeighbors(const FCell& cell, 
 
     for (const auto& dir : directions) {
         int32 newRow = cell.Key + dir[0], newCol = cell.Value + dir[1];
-        if (IsValidCell(newRow, newCol, rows, cols) && Maze[newRow][newCol] == ' ') {
+        if (IsInMaze(newRow, newCol, rows, cols) && Maze[newRow][newCol] == ' ') {
             neighbors.Add(FCell(newRow, newCol));
         }
     }
@@ -316,7 +320,7 @@ void AUE5TopDownARPGGameMode::SpawnCamera()
 
         FVector Location = { MidX, MidY, MidZ };
         FActorSpawnParameters SpawnParams;
-        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, FRotator(-90.f, 0.f, 0.f), SpawnParams);
+        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, FRotator(-80.f, 0.f, 0.f), SpawnParams);
 
         if (CameraActor)
         {

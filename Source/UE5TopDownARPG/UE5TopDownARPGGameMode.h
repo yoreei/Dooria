@@ -28,6 +28,8 @@ public:
 
 	bool IsValidCell(int32 row, int32 col, int32 rows, int32 cols);
 
+	bool IsInMaze(int32 row, int32 col, int32 rows, int32 cols);
+
 	TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, int32 rows, int32 cols);
 
 	void RemoveWall(FCell& current, FCell& next);
