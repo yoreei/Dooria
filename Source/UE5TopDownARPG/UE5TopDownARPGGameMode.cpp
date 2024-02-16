@@ -187,9 +187,9 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
                     Maze[row][col - 1].Type == CellType::Path && Maze[row][col + 1].Type == CellType::Path
                     );
             }, PotentialTraps);
-        int NumLoops = ((Maze.Num() + Maze[0].Num())) * TrapSpawnFactor;
+        int NumTraps = ((Maze.Num() + Maze[0].Num())) * TrapSpawnFactor;
         TArray<FCell> Traps;
-        GetRandom(NumLoops, PotentialTraps, Traps);
+        GetRandom(NumTraps, PotentialTraps, Traps);
 
         for (auto& Cell : Traps)
         {
@@ -250,25 +250,34 @@ ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
     {
         int TileType = CalculateWallTileType(i, j);
         DooriaPath->setWallBitMask(TileType);
+        DooriaPath->hasTrap = Maze[i][j].hasTrap;
+        DooriaPath->hasLightSource = Maze[i][j].hasLightSource;
     }
+
+    if (Maze[i][j].isPlayerStart) {
+        ACharacter* SpawnedCharacter = Cast<ACharacter>(BasicSpawn(i, j, CharacterClass));
+        if (ensure(SpawnedCharacter))
+        {
+            APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+            if (PlayerController)
+            {
+                PlayerController->Possess(SpawnedCharacter);
+            }
+        }
+
+    }
+    if (Maze[i][j].hasDoor) {
+        AActor* Actor = BasicSpawn(i, j, DoorClass);
+        ADoorTrigger* Door = Cast<ADoorTrigger>(Actor);
+        if (ensure(Door))
+        {
+            FRotator Rotator = CalculateRotation(i, j);
+            Door->SetActorRotation(Rotator);
+            UE_LOG(LogTemp, Warning, TEXT("Door %s ; Rotation: %s"), *Door->GetActorNameOrLabel(), *Rotator.ToString());
+        }
+    }
+
     return DooriaPath;
-}
-
-void AUE5TopDownARPGGameMode::SpawnFloorTrapAtGridLoc(int i, int j)
-{
-    //TArray<TSubclassOf<AActor>> TrapType = { SwordFloorTrapClass, FlameFloorTrapClass, GeiserFloorTrapClass, BoulderFloorTrapClass };
-    TArray<TSubclassOf<AActor>> TrapType = { FloorTrapClass };
-    int32 RandIdx = FMath::RandRange(0, TrapType.Num() - 1);
-    auto RandTrapClass = TrapType[RandIdx];
-
-    AActor* Actor = BasicSpawn(i, j, TrapType[RandIdx]);
-    AFloorTrapTrigger* Trap = Cast<AFloorTrapTrigger>(Actor);
-    if (ensure(Trap))
-    {
-        FRotator Rotator = CalculateRotation(i, j);
-        Trap->SetActorRotation(Rotator);
-        UE_LOG(LogTemp, Warning, TEXT("Spawning Trap %s"), *Trap->GetActorNameOrLabel());
-    }
 }
 
 void AUE5TopDownARPGGameMode::SpawnMaze()
@@ -283,18 +292,6 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
             else if (Maze[i][j].Type == CellType::Path)
             {
                 SpawnPathAtGridLoc(i, j);
-
-                if (Maze[i][j].isPlayerStart) {
-                    SpawnPlayerAtGridLoc(i, j);
-
-                }
-                if (Maze[i][j].hasDoor) {
-                    SpawnDoorAtGridLoc(i, j);
-                }
-
-                else if (Maze[i][j].hasTrap) {
-                    SpawnFloorTrapAtGridLoc(i, j);
-                }
             }
 		}
 	}
@@ -380,31 +377,6 @@ ADooriaObstruction* AUE5TopDownARPGGameMode::SpawnObstructionAtGridLoc(int i, in
     return Obstruction;
 }
 
-void AUE5TopDownARPGGameMode::SpawnPlayerAtGridLoc(int i, int j)
-{
-    ACharacter* SpawnedCharacter = Cast<ACharacter>(BasicSpawn(i, j, CharacterClass));
-    if (ensure(SpawnedCharacter))
-    {
-        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-        if (PlayerController)
-        {
-            PlayerController->Possess(SpawnedCharacter);
-        }
-    }
-}
-
-void AUE5TopDownARPGGameMode::SpawnDoorAtGridLoc(int i, int j)
-{
-    AActor* Actor = BasicSpawn(i, j, DoorClass);
-    ADoorTrigger* Door = Cast<ADoorTrigger>(Actor);
-    if (ensure(Door))
-    {
-        FRotator Rotator = CalculateRotation(i, j);
-        Door->SetActorRotation(Rotator);
-        UE_LOG(LogTemp, Warning, TEXT("Door %s ; Rotation: %s"), *Door->GetActorNameOrLabel(), *Rotator.ToString());
-    }
-}
-
 FRotator AUE5TopDownARPGGameMode::CalculateRotation(int i, int j)
 {
     if (Maze.Num() - 1 == i)
@@ -444,7 +416,13 @@ void AUE5TopDownARPGGameMode::PrintMaze()
     for (const auto& row : Maze) {
         FString RowString;
         for (auto& cell : row) {
-            RowString += FString::Printf(TEXT("%c"), cell.Type == CellType::Wall ? '#' : ' ');
+            RowString += FString::Printf(TEXT("%c"),
+                cell.Type == CellType::Wall ? '#' : 
+                cell.hasDoor                ? 'D' :
+                cell.hasTrap                ? 'T' :
+                cell.hasLightSource         ? 'L' :
+                cell.isPlayerStart          ? 'S' :
+                cell.Type == CellType::Path ? ' ' : '0'); // 0 should never happen
         }
         UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
     }

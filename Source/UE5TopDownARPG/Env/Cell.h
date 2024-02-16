@@ -62,6 +62,12 @@ public:
 
 	void setWallBitMask(int Val);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool hasTrap = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool hasLightSource = false;
+
 	/*
 		NONE = 0b 0000 0000,
 		N =    0b 0000 0001,

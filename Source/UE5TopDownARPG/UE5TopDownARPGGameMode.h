@@ -46,12 +46,6 @@ public:
 
 	void SpawnCamera();
 
-	void SpawnPlayerAtGridLoc(int i, int j);
-
-	void SpawnDoorAtGridLoc(int i, int j);
-
-	void SpawnFloorTrapAtGridLoc(int i, int j);
-
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
 	ADooriaCell* SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass);
