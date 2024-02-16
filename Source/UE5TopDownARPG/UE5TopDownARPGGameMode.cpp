@@ -202,7 +202,8 @@ ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
 
 void AUE5TopDownARPGGameMode::SpawnFloorTrapAtGridLoc(int i, int j)
 {
-    TArray<TSubclassOf<AActor>> TrapType = { SwordFloorTrapClass, FlameFloorTrapClass, GeiserFloorTrapClass, BoulderFloorTrapClass };
+    //TArray<TSubclassOf<AActor>> TrapType = { SwordFloorTrapClass, FlameFloorTrapClass, GeiserFloorTrapClass, BoulderFloorTrapClass };
+    TArray<TSubclassOf<AActor>> TrapType = { FloorTrapClass };
     int32 RandIdx = FMath::RandRange(0, TrapType.Num() - 1);
     auto RandTrapClass = TrapType[RandIdx];
 
@@ -246,6 +247,32 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
             }
 		}
 	}
+}
+
+void AUE5TopDownARPGGameMode::SpawnCamera()
+{
+    // Spawn the camera actor
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (PlayerController)
+    {
+        float MidX = (Maze[0].Num() / 2) * CellSize;
+        float MidY = (Maze.Num() / 2) * CellSize;
+        float MidZ = FMath::Max(MidX, MidY) * CameraZFactor;
+
+        FVector Location = { MidX, MidY, MidZ };
+        FActorSpawnParameters SpawnParams;
+        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, FRotator(-90.f, 0.f, 0.f), SpawnParams);
+
+        if (CameraActor)
+        {
+            PlayerController->SetViewTarget(CameraActor);
+        }
+        else
+        {
+            // If not spawning, find your camera actor in the level and set it as the view target
+            // Example: Find your camera actor by tag or name
+        }
+    }
 }
 
 int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
@@ -374,6 +401,7 @@ void AUE5TopDownARPGGameMode::StartPlay()
     InitializeMaze(rows, cols);
     GenerateMaze(rows, cols);
     SpawnMaze();
+    SpawnCamera();
 
     // Print the Maze
     for (const auto& row : Maze) {
