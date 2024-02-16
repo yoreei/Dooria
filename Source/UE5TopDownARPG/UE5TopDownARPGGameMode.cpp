@@ -200,13 +200,11 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
 
 void AUE5TopDownARPGGameMode::GenerateLightSources() {
     using namespace Side;
+    // Essential Lighting
+
     // Bottom Data Takes Precedence
     TArray<TTuple<int32, int32, FString>> LightSourcePlaces = {
         /* Must be Path:     |    Must be Wall       | Light Source Placement */
-        {N | S,            /*|*/ W | NW | SW,      /*|*/ "W" }, // Long Wall
-        {N | S,            /*|*/ E | NE | SE,      /*|*/ "E" },
-        {W | E,            /*|*/ N | NW | NE,      /*|*/ "N" },
-        {W | E,            /*|*/ S | SW | SE,      /*|*/ "S" },
         {N | S | E,        /*|*/ W | DIAG,         /*|*/ "W" }, // T - Cross
         {N | S | W,        /*|*/ E | DIAG,         /*|*/ "E" },
         {W | E | N,        /*|*/ S | DIAG,         /*|*/ "S" },
@@ -222,15 +220,19 @@ void AUE5TopDownARPGGameMode::GenerateLightSources() {
     };
 
     TArray<AActor*> FoundActors;
+    TArray<ADooriaPath*> PotentialLights;
+    TArray<ADooriaPath*> PotentialLightsEx;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADooriaPath::StaticClass(), FoundActors);
     for (auto& Actor : FoundActors)
     {
         ADooriaPath* Path = Cast<ADooriaPath>(Actor);
-        if (!IsValid(Path)) { continue; }
-        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Valid Path"));
+        if (IsValid(Path) && !Path->HasTrap) {
+            PotentialLights.Add(Path);
+        }
+    }
 
-        if (Path->HasTrap) { continue; }
-        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Valid Path Without Trap"));
+    for (auto& Path : PotentialLights)
+    {
         int32 Walls = Path->WallBitMaskDec;
         int32 Paths = ~Path->WallBitMaskDec;
         
@@ -238,12 +240,39 @@ void AUE5TopDownARPGGameMode::GenerateLightSources() {
         {
             if ((Paths & Entry.Get<0>()) == Entry.Get<0>())
             {
-                UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Matching Paths..."));
                 if ((Walls & Entry.Get<1>()) == Entry.Get<1>())
                 {
-                    UE_LOG(LogUE5TopDownARPG, Log, TEXT("... Found Light"));
-                    Path->HasLightSource = true;
+                    Path->HasLightSource = LightSourceType::MainLight;
                     Path->LightSourceSide = Entry.Get<2>();
+                    break;
+                }
+            }
+            PotentialLightsEx.Add(Path); // Did not add a light here, so consider it for 2nd pass
+        }
+    }
+
+    TArray<TTuple<int32, int32, FString>> LightSourcePlacesEx = {
+        /* Must be Path:     |    Must be Wall       | Light Source Placement */
+        {N | S,            /*|*/ W | NW | SW,      /*|*/ "W" }, // Long Wall
+        {N | S,            /*|*/ E | NE | SE,      /*|*/ "E" },
+        {W | E,            /*|*/ N | NW | NE,      /*|*/ "N" },
+        {W | E,            /*|*/ S | SW | SE,      /*|*/ "S" },
+    };
+
+    for (auto& Path : PotentialLightsEx)
+    {
+        int32 Walls = Path->WallBitMaskDec;
+        int32 Paths = ~Path->WallBitMaskDec;
+
+        for (auto& Entry : LightSourcePlacesEx)
+        {
+            if ((Paths & Entry.Get<0>()) == Entry.Get<0>())
+            {
+                if ((Walls & Entry.Get<1>()) == Entry.Get<1>())
+                {
+                    Path->HasLightSource = LightSourceType::ExtraLight;
+                    Path->LightSourceSide = Entry.Get<2>();
+                    break;
                 }
             }
         }

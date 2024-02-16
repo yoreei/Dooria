@@ -66,25 +66,25 @@ public:
 	
 	void StartPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> WallClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> DoorClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> PathClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> CharacterClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> FloorTrapClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float LoopinessFactor = 1.f;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float TrapSpawnFactor = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")

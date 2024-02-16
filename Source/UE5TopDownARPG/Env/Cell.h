@@ -23,6 +23,14 @@ namespace Side {
 	constexpr int32 ALL = DIAG | CARD;
 }
 
+UENUM(BlueprintType)
+enum class LightSourceType : uint8
+{
+	None        UMETA(DisplayName = "None"),
+	MainLight   UMETA(DisplayName = "MainLight"),
+	ExtraLight  UMETA(DisplayName = "ExtraLight")
+};
+
 UCLASS(Blueprintable)
 class ADooriaCell : public AStaticMeshActor
 {
@@ -70,8 +78,9 @@ public:
 	bool HasTrap = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
-	bool HasLightSource = false;
+	LightSourceType HasLightSource = LightSourceType::None;
 
+	/* N, S, E, W */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
 	FString LightSourceSide = "";
 
