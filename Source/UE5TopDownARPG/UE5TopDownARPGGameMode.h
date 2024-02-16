@@ -38,6 +38,8 @@ public:
 
 	void SpawnMaze();
 
+	void SpawnCamera();
+
 	void SpawnPlayerAtGridLoc(int i, int j);
 
 	void SpawnDoorAtGridLoc(int i, int j);
@@ -75,16 +77,22 @@ public:
 	TSubclassOf<AActor> CharacterClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> SwordFloorTrapClass;
+	TSubclassOf<AActor> FloorTrapClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> FlameFloorTrapClass;
+	TSubclassOf<AActor> CameraClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> GeiserFloorTrapClass;
+	float CameraZFactor = 1.9;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	TSubclassOf<AActor> BoulderFloorTrapClass;
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> FlameFloorTrapClass;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> GeiserFloorTrapClass;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	//TSubclassOf<AActor> BoulderFloorTrapClass;
 	
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> Friend1Class;
