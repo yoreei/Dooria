@@ -34,7 +34,6 @@ public:
 	CellType Type;
 
 	// Components
-	bool hasLightSource = false;
 	bool hasTrap = false;
 	bool hasDoor;
 	bool isPlayerStart;

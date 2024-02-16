@@ -5,19 +5,23 @@
 #include "CoreMinimal.h"
 #include "Engine/StaticMeshActor.h"
 #include "Containers/BitArray.h"
+#include "Misc/Char.h"
 #include "Cell.generated.h"
 
-enum class Side : int32 {
-	NONE = 0b00000000,
-	N = 0b00000001,
-	NE = 0b00000010,
-	E = 0b00000100,
-	SE = 0b00001000,
-	S = 0b00010000,
-	SW = 0b00100000,
-	W = 0b01000000,
-	NW = 0b10000000
-};
+namespace Side {
+	constexpr int32 NONE = 0b00000000;
+	constexpr int32 N = 0b00000001;
+	constexpr int32 NE = 0b00000010;
+	constexpr int32 E = 0b00000100;
+	constexpr int32 SE = 0b00001000;
+	constexpr int32 S = 0b00010000;
+	constexpr int32 SW = 0b00100000;
+	constexpr int32 W = 0b01000000;
+	constexpr int32 NW = 0b10000000;
+	constexpr int32 DIAG = SE | SW | NE | NW;
+	constexpr int32 CARD = N | S | W | E;
+	constexpr int32 ALL = DIAG | CARD;
+}
 
 UCLASS(Blueprintable)
 class ADooriaCell : public AStaticMeshActor
@@ -60,13 +64,16 @@ public:
 
 	// Setters
 
-	void setWallBitMask(int Val);
+	void SetWallBitMask(int Val);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
-	bool hasTrap = false;
+	bool HasTrap = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
-	bool hasLightSource = false;
+	bool HasLightSource = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	FString LightSourceSide = "";
 
 	/*
 		NONE = 0b 0000 0000,

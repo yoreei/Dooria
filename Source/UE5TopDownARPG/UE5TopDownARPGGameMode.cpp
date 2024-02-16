@@ -198,6 +198,58 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
     }
 }
 
+void AUE5TopDownARPGGameMode::GenerateLightSources() {
+    using namespace Side;
+    // Bottom Data Takes Precedence
+    TArray<TTuple<int32, int32, FString>> LightSourcePlaces = {
+        /* Must be Path:     |    Must be Wall       | Light Source Placement */
+        {N | S,            /*|*/ W | NW | SW,      /*|*/ "W" }, // Long Wall
+        {N | S,            /*|*/ E | NE | SE,      /*|*/ "E" },
+        {W | E,            /*|*/ N | NW | NE,      /*|*/ "N" },
+        {W | E,            /*|*/ S | SW | SE,      /*|*/ "S" },
+        {N | S | E,        /*|*/ W | DIAG,         /*|*/ "W" }, // T - Cross
+        {N | S | W,        /*|*/ E | DIAG,         /*|*/ "E" },
+        {W | E | N,        /*|*/ S | DIAG,         /*|*/ "S" },
+        {W | E | S,        /*|*/ N | DIAG,         /*|*/ "N" },
+        {NW | NE | E | W,  /*|*/ N,                /*|*/ "N" }, // Outer Corners
+        {SW | SE | E | W,  /*|*/ S,                /*|*/ "S" },
+        {NW | SW | N | S,  /*|*/ W,                /*|*/ "W" },
+        {NE | SE | N | S,  /*|*/ E,                /*|*/ "E" },
+        {E,                /*|*/ W | N | S | DIAG, /*|*/ "W" }, // Inner Corners
+        {W,                /*|*/ E | N | S | DIAG, /*|*/ "E" },
+        {N,                /*|*/ S | W | E | DIAG, /*|*/ "S" },
+        {S,                /*|*/ N | W | E | DIAG, /*|*/ "N" }
+    };
+
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADooriaPath::StaticClass(), FoundActors);
+    for (auto& Actor : FoundActors)
+    {
+        ADooriaPath* Path = Cast<ADooriaPath>(Actor);
+        if (!IsValid(Path)) { continue; }
+        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Valid Path"));
+
+        if (Path->HasTrap) { continue; }
+        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Valid Path Without Trap"));
+        int32 Walls = Path->WallBitMaskDec;
+        int32 Paths = ~Path->WallBitMaskDec;
+        
+        for (auto& Entry : LightSourcePlaces)
+        {
+            if ((Paths & Entry.Get<0>()) == Entry.Get<0>())
+            {
+                UE_LOG(LogUE5TopDownARPG, Log, TEXT("Found Matching Paths..."));
+                if ((Walls & Entry.Get<1>()) == Entry.Get<1>())
+                {
+                    UE_LOG(LogUE5TopDownARPG, Log, TEXT("... Found Light"));
+                    Path->HasLightSource = true;
+                    Path->LightSourceSide = Entry.Get<2>();
+                }
+            }
+        }
+    }
+}
+
 AUE5TopDownARPGGameMode::AUE5TopDownARPGGameMode()
 {
 	// use our custom PlayerController class
@@ -249,9 +301,8 @@ ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
     if (ensure(DooriaPath))
     {
         int TileType = CalculateWallTileType(i, j);
-        DooriaPath->setWallBitMask(TileType);
-        DooriaPath->hasTrap = Maze[i][j].hasTrap;
-        DooriaPath->hasLightSource = Maze[i][j].hasLightSource;
+        DooriaPath->SetWallBitMask(TileType);
+        DooriaPath->HasTrap = Maze[i][j].hasTrap;
     }
 
     if (Maze[i][j].isPlayerStart) {
@@ -325,29 +376,30 @@ void AUE5TopDownARPGGameMode::SpawnCamera()
 
 int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
 {
-    TMap<TPair<int32, int32>, Side> Dirs{
-        {{0, 1}, Side::N},
-        {{1, 1}, Side::NE},
-        {{1, 0}, Side::E},
-        {{1, -1}, Side::SE},
-        {{0, -1}, Side::S},
-        {{-1, -1}, Side::SW},
-        {{-1, 0}, Side::W},
-        {{-1, 1}, Side::NW}
+    using namespace Side;
+    TMap<TPair<int32, int32>, int32> Dirs{
+        {{0, 1}, N},
+        {{1, 1}, NE},
+        {{1, 0}, E},
+        {{1, -1}, SE},
+        {{0, -1}, S},
+        {{-1, -1}, SW},
+        {{-1, 0}, W},
+        {{-1, 1}, NW}
     };
 
     int32 Result = 0;
 
     for (const auto& dir : Dirs) {
         TPair<int32, int32> Coords = dir.Key;
-        Side BitValue = dir.Value;
+        int32 BitValue = dir.Value;
 
         int newI = i + Coords.Value;
         int newJ = j + Coords.Key;
         
         if (!IsValidCell(newJ, newI, Maze[0].Num(), Maze.Num()) || Maze[newI][newJ].Type == CellType::Wall)
         {
-            Result += static_cast<int>(BitValue);
+            Result += BitValue;
         }
     }
 
@@ -420,7 +472,6 @@ void AUE5TopDownARPGGameMode::PrintMaze()
                 cell.Type == CellType::Wall ? '#' : 
                 cell.hasDoor                ? 'D' :
                 cell.hasTrap                ? 'T' :
-                cell.hasLightSource         ? 'L' :
                 cell.isPlayerStart          ? 'S' :
                 cell.Type == CellType::Path ? ' ' : '0'); // 0 should never happen
         }
@@ -440,6 +491,7 @@ void AUE5TopDownARPGGameMode::StartPlay()
     InitializeMaze(rows, cols);
     GenerateMaze(rows, cols);
     SpawnMaze();
+    GenerateLightSources();
     SpawnCamera();
     PrintMaze();
 

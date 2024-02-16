@@ -40,6 +40,8 @@ public:
 
 	void PrintMaze();
 
+	void GenerateLightSources();
+
 	// Spawn Methods
 
 	void SpawnMaze();
