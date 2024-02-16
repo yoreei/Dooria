@@ -7,8 +7,7 @@
 #include "Env/Cell.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
-using FCell = TPair<int32, int32>;
-
+using FCell = TPair<int32, int32>; // Key = Y, Value = X
 UCLASS(minimalapi)
 class AUE5TopDownARPGGameMode : public AGameModeBase
 {
@@ -33,7 +32,7 @@ public:
 
 	void RemoveWall(FCell& current, FCell& next);
 
-	void GetRandPerimPoints(int32 rows, int32 cols, TArray<FCell>& output, int32 num);
+	void CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output);
 
 	// Spawn Methods
 
@@ -42,6 +41,8 @@ public:
 	void SpawnPlayerAtGridLoc(int i, int j);
 
 	void SpawnDoorAtGridLoc(int i, int j);
+
+	void SpawnFloorTrapAtGridLoc(int i, int j);
 
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
@@ -73,6 +74,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CharacterClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> SwordFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> FlameFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> GeiserFloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	TSubclassOf<AActor> BoulderFloorTrapClass;
+	
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> Friend1Class;
 
