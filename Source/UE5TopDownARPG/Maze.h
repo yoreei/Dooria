@@ -20,3 +20,22 @@ void GetRandom(int Num, TArray<T>& InArray, TArray<T>& OutArray)
 		Num--;
 	}
 }
+
+enum class CellType {
+	NONE,
+	Path,
+	Wall
+};
+
+class MazeCell {
+public:
+	MazeCell(CellType _Type) : Type(_Type){}
+	// is
+	CellType Type;
+
+	// Components
+	bool hasLightSource;
+	bool hasTrap;
+	bool hasDoor;
+	bool isPlayerStart;
+};

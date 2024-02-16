@@ -38,6 +38,8 @@ public:
 
 	void GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops);
 
+	void PrintMaze();
+
 	// Spawn Methods
 
 	void SpawnMaze();
@@ -126,7 +128,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	int32 MustOpenDoorsToWin = 3;
 
-	TArray<TArray<TCHAR>> Maze;
+	TArray<TArray<MazeCell>> Maze;
 };
 
 

@@ -23,15 +23,14 @@
 template<typename T>
 using TStack = TArray<T>;
 
-// Initialize the Maze with walls ('#') and cells (' ')
 void AUE5TopDownARPGGameMode::InitializeMaze(int32 rows, int32 cols) {
     Maze.Empty();
     Maze.Reserve(rows);
     for (int32 i = 0; i < rows; ++i) {
-        TArray<TCHAR> row;
+        TArray<MazeCell> row;
         row.Reserve(cols);
         for (int32 j = 0; j < cols; ++j) {
-            row.Add(i % 2 != 0 && j % 2 != 0 ? ' ' : '#');
+            row.Add(i % 2 != 0 && j % 2 != 0 ? MazeCell(CellType::NONE) : MazeCell(CellType::Wall));
         }
         Maze.Add(row);
     }
@@ -53,7 +52,7 @@ TArray<FCell> AUE5TopDownARPGGameMode::GetUnvisitedNeighbors(const FCell& cell, 
 
     for (const auto& dir : directions) {
         int32 newRow = cell.Key + dir[0], newCol = cell.Value + dir[1];
-        if (IsInMaze(newRow, newCol, rows, cols) && Maze[newRow][newCol] == ' ') {
+        if (IsInMaze(newRow, newCol, rows, cols) && Maze[newRow][newCol].Type == CellType::NONE) {
             neighbors.Add(FCell(newRow, newCol));
         }
     }
@@ -64,7 +63,7 @@ TArray<FCell> AUE5TopDownARPGGameMode::GetUnvisitedNeighbors(const FCell& cell, 
 void AUE5TopDownARPGGameMode::RemoveWall(FCell& current, FCell& next) {
     int32 wallRow = (current.Key + next.Key) / 2;
     int32 wallCol = (current.Value + next.Value) / 2;
-    Maze[wallRow][wallCol] = ' ';
+    Maze[wallRow][wallCol].Type = CellType::Path;
 }
 
 // Randomly select perimeter points
@@ -111,7 +110,7 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         srand(time(nullptr));
         TStack<FCell> stack;
 
-        Maze[1][1] = 'V';
+        Maze[1][1].Type = CellType::Path;
         stack.Push(FCell(1, 1));
 
         while (!stack.IsEmpty()) {
@@ -123,28 +122,23 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
 
                 FCell chosenNeighbor = neighbors[FMath::RandRange(0, neighbors.Num() - 1)];
                 RemoveWall(currentCell, chosenNeighbor);
-                Maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
+                Maze[chosenNeighbor.Key][chosenNeighbor.Value].Type = CellType::Path;
                 stack.Push(chosenNeighbor);
             }
         }
     }
 
-    // Reset visited cells to empty spaces
-    for (int32 i = 1; i < rows; i += 2) {
-        for (int32 j = 1; j < cols; j += 2) {
-            if (Maze[i][j] == 'V') Maze[i][j] = ' ';
-        }
-    }
+    PrintMaze();
 
     // Add Loops in Maze
     {
         TArray<FCell> PotentialLoops;
         GetAllCellsPred([this](int row, int col) -> bool {
-            return Maze[row][col] == '#' &&
+            return Maze[row][col].Type == CellType::Wall &&
                 (
-                    Maze[row - 1][col] == ' ' && Maze[row + 1][col] == ' '
+                    Maze[row - 1][col].Type == CellType::Path && Maze[row + 1][col].Type == CellType::Path
                     ||
-                    Maze[row][col - 1] == ' ' && Maze[row][col + 1] == ' '
+                    Maze[row][col - 1].Type == CellType::Path && Maze[row][col + 1].Type == CellType::Path
                     );
             }, PotentialLoops);
 
@@ -154,7 +148,7 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
 
         for (auto& Cell : Loops)
         {
-            Maze[Cell.Key][Cell.Value] = ' ';
+            Maze[Cell.Key][Cell.Value].Type = CellType::Path;
         }
     }
 
@@ -166,7 +160,8 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         {
             middleCol--;
         }
-        Maze[0][middleCol] = '0';
+        Maze[0][middleCol].Type = CellType::Path;
+        Maze[0][middleCol].isPlayerStart = true;
     }
 
     // Generate Doors
@@ -176,8 +171,8 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
 
         int32 doorIdx = 1;
         for (const auto& door : doors) {
-            Maze[door.Key][door.Value] = '0' + doorIdx;
-            doorIdx++;
+            Maze[door.Key][door.Value].Type = CellType::Path;
+            Maze[door.Key][door.Value].hasDoor = true;
         }
     }
 
@@ -185,11 +180,11 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
     {
         TArray<FCell> PotentialTraps;
         GetAllCellsPred([this](int row, int col) -> bool {
-            return Maze[row][col] == ' ' &&
+            return Maze[row][col].Type == CellType::Path &&
                 (
-                    Maze[row - 1][col] == ' ' && Maze[row + 1][col] == ' '
+                    Maze[row - 1][col].Type == CellType::Path && Maze[row + 1][col].Type == CellType::Path
                     ||
-                    Maze[row][col - 1] == ' ' && Maze[row][col + 1] == ' '
+                    Maze[row][col - 1].Type == CellType::Path && Maze[row][col + 1].Type == CellType::Path
                     );
             }, PotentialTraps);
         int NumLoops = ((Maze.Num() + Maze[0].Num())) * TrapSpawnFactor;
@@ -198,7 +193,7 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
 
         for (auto& Cell : Traps)
         {
-            Maze[Cell.Key][Cell.Value] = 'T';
+            Maze[Cell.Key][Cell.Value].hasTrap = true;
         }
     }
 }
@@ -280,29 +275,26 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
 {
 	for (int32 i = 0; i < Maze.Num(); ++i) {
 		for (int32 j = 0; j < Maze[i].Num(); ++j) {
-            if (Maze[i][j] == '#')
+            if (Maze[i][j].Type == CellType::Wall)
             {
                 SpawnObstructionAtGridLoc(i, j);
             }
 
-            else if (Maze[i][j] == ' ')
+            else if (Maze[i][j].Type == CellType::Path)
             {
                 SpawnPathAtGridLoc(i, j);
-            }
 
-            else if (Maze[i][j] == '0') {
-                SpawnPathAtGridLoc(i, j);
-                SpawnPlayerAtGridLoc(i,j);
+                if (Maze[i][j].isPlayerStart) {
+                    SpawnPlayerAtGridLoc(i, j);
 
-            }
-            else if (Maze[i][j] >= '1' && Maze[i][j] <= '9') {
-                SpawnPathAtGridLoc(i, j);
-                SpawnDoorAtGridLoc(i,j);
-            }
+                }
+                if (Maze[i][j].hasDoor) {
+                    SpawnDoorAtGridLoc(i, j);
+                }
 
-            else if (Maze[i][j] == 'T') {
-                SpawnPathAtGridLoc(i, j);
-                SpawnFloorTrapAtGridLoc(i, j);
+                else if (Maze[i][j].hasTrap) {
+                    SpawnFloorTrapAtGridLoc(i, j);
+                }
             }
 		}
 	}
@@ -356,7 +348,7 @@ int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
         int newI = i + Coords.Value;
         int newJ = j + Coords.Key;
         
-        if (!IsValidCell(newJ, newI, Maze[0].Num(), Maze.Num()) || Maze[newI][newJ] == '#')
+        if (!IsValidCell(newJ, newI, Maze[0].Num(), Maze.Num()) || Maze[newI][newJ].Type == CellType::Wall)
         {
             Result += static_cast<int>(BitValue);
         }
@@ -447,6 +439,16 @@ FVector AUE5TopDownARPGGameMode::CalculateUELocation(int i, int j)
     return FVector(i * CellSize, j * CellSize, 0);
 }
 
+void AUE5TopDownARPGGameMode::PrintMaze()
+{
+    for (const auto& row : Maze) {
+        FString RowString;
+        for (auto& cell : row) {
+            RowString += FString::Printf(TEXT("%c"), cell.Type == CellType::Wall ? '#' : ' ');
+        }
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
+    }
+}
 
 void AUE5TopDownARPGGameMode::StartPlay()
 {
@@ -461,19 +463,8 @@ void AUE5TopDownARPGGameMode::StartPlay()
     GenerateMaze(rows, cols);
     SpawnMaze();
     SpawnCamera();
-
-    // Print the Maze
-    for (const auto& row : Maze) {
-        FString RowString;
-        for (TCHAR cell : row) {
-            RowString += FString::Printf(TEXT("%c"), cell);
-        }
-        UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
-    }
+    PrintMaze();
 
 	Super::StartPlay();
 
 }
-
-
-
