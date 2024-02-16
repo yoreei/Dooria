@@ -28,6 +28,8 @@ public:
 
 	bool IsValidCell(int32 row, int32 col, int32 rows, int32 cols);
 
+	bool IsInMaze(int32 row, int32 col, int32 rows, int32 cols);
+
 	TArray<FCell> GetUnvisitedNeighbors(const FCell& cell, int32 rows, int32 cols);
 
 	void RemoveWall(FCell& current, FCell& next);
@@ -35,6 +37,8 @@ public:
 	void CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output);
 
 	void GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops);
+
+	void PrintMaze();
 
 	// Spawn Methods
 
@@ -124,7 +128,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	int32 MustOpenDoorsToWin = 3;
 
-	TArray<TArray<TCHAR>> Maze;
+	TArray<TArray<MazeCell>> Maze;
 };
 
 
