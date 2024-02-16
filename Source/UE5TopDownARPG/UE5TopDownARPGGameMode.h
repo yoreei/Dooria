@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Env/Cell.h"
+#include "Maze.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
-using FCell = TPair<int32, int32>; // Key = Y, Value = X
 UCLASS(minimalapi)
 class AUE5TopDownARPGGameMode : public AGameModeBase
 {
@@ -33,6 +33,8 @@ public:
 	void RemoveWall(FCell& current, FCell& next);
 
 	void CalculateDoorLocations(FCell start, int32 num, TArray<FCell>& output);
+
+	void GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops);
 
 	// Spawn Methods
 
@@ -64,26 +66,36 @@ public:
 	
 	void StartPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> WallClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> DoorClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> PathClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> CharacterClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> FloorTrapClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	float LoopinessFactor = 1.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Dooria|MazeGen")
+	float TrapSpawnFactor = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CameraClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	float CameraZFactor = 1.9;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	float CellSize = 128.f;
+
 
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;

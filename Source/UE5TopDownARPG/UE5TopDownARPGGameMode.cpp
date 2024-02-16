@@ -7,6 +7,7 @@
 #include "UE5TopDownARPG.h"
 #include "Env/Cell.h"
 #include "Env/Door.h"
+#include "Maze.h"
 #include "Trigger/FloorTrapTrigger.h"
 
 #include "GameFramework/Actor.h"
@@ -20,7 +21,6 @@
 
 template<typename T>
 using TStack = TArray<T>;
-const static float CellSize = 100.0f; // Unreal units per cell
 
 // Initialize the Maze with walls ('#') and cells (' ')
 void AUE5TopDownARPGGameMode::InitializeMaze(int32 rows, int32 cols) {
@@ -86,25 +86,41 @@ void AUE5TopDownARPGGameMode::CalculateDoorLocations(FCell start, int32 num, TAr
     }
 }
 
-// Depth-First Search with Backtracking to generate Maze paths
+void AUE5TopDownARPGGameMode::GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops)
+{
+    for (int row = 1; row < Maze.Num() - 1 ; ++row)
+    {
+        for (int col = 1; col < Maze[0].Num() - 1; ++col)
+        {
+            if (Pred(row, col))
+            {
+                PotentialLoops.Add(FCell(row, col));
+            }
+        }
+    }
+}
+
 void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
-    srand(time(nullptr));
-    TStack<FCell> stack;
+    // Depth-First Search with Backtracking
+    {
+        srand(time(nullptr));
+        TStack<FCell> stack;
 
-    Maze[1][1] = 'V';
-    stack.Push(FCell(1, 1));
+        Maze[1][1] = 'V';
+        stack.Push(FCell(1, 1));
 
-    while (!stack.IsEmpty()) {
-        FCell currentCell = stack.Pop();
+        while (!stack.IsEmpty()) {
+            FCell currentCell = stack.Pop();
 
-        auto neighbors = GetUnvisitedNeighbors(currentCell, rows, cols);
-        if (neighbors.Num() > 0) {
-            stack.Push(currentCell); // Push current cell back to stack
+            auto neighbors = GetUnvisitedNeighbors(currentCell, rows, cols);
+            if (neighbors.Num() > 0) {
+                stack.Push(currentCell);
 
-            FCell chosenNeighbor = neighbors[FMath::RandRange(0, neighbors.Num() - 1)];
-            RemoveWall(currentCell, chosenNeighbor);
-            Maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
-            stack.Push(chosenNeighbor);
+                FCell chosenNeighbor = neighbors[FMath::RandRange(0, neighbors.Num() - 1)];
+                RemoveWall(currentCell, chosenNeighbor);
+                Maze[chosenNeighbor.Key][chosenNeighbor.Value] = 'V';
+                stack.Push(chosenNeighbor);
+            }
         }
     }
 
@@ -115,33 +131,71 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         }
     }
 
-    // Add Loops in Maze With Traps
-
-    for (int row = 2; row < Maze.Num(); row += 4)
+    // Add Loops in Maze
     {
-        int32 randCol;
-        do
-        {
-            randCol = FMath::RandRange(0, Maze[0].Num() - 1);
-        } while (Maze[row][randCol] != '#');
+        TArray<FCell> PotentialLoops;
+        GetAllCellsPred([this](int row, int col) -> bool {
+            return Maze[row][col] == '#' &&
+                (
+                    Maze[row - 1][col] == ' ' && Maze[row + 1][col] == ' '
+                    ||
+                    Maze[row][col - 1] == ' ' && Maze[row][col + 1] == ' '
+                    );
+            }, PotentialLoops);
 
-        Maze[row][randCol] = 'T';
+        int NumLoops = ((Maze.Num() + Maze[0].Num()) / 5) * LoopinessFactor;
+        TArray<FCell> Loops;
+        GetRandom(NumLoops, PotentialLoops, Loops);
+
+        for (auto& Cell : Loops)
+        {
+            Maze[Cell.Key][Cell.Value] = ' ';
+        }
     }
 
     // Generate Start
-    Maze[0][cols / 2] = '0';
-
-    // Generate Doors
-    TArray<FCell> doors;
-    CalculateDoorLocations(FCell(0, cols / 2), 3, doors);
-
-    int32 doorIdx = 1;
-    for (const auto& door : doors) {
-        Maze[door.Key][door.Value] = '0' + doorIdx;
-        doorIdx++;
+    {
+        int32 middleCol = cols / 2;
+        // Ensure middleCol is odd. If it's even, decrement by 1.
+        if (middleCol % 2 == 0)
+        {
+            middleCol--;
+        }
+        Maze[0][middleCol] = '0';
     }
 
-    // TODO Spawn Traps
+    // Generate Doors
+    {
+        TArray<FCell> doors;
+        CalculateDoorLocations(FCell(0, cols / 2), 3, doors);
+
+        int32 doorIdx = 1;
+        for (const auto& door : doors) {
+            Maze[door.Key][door.Value] = '0' + doorIdx;
+            doorIdx++;
+        }
+    }
+
+    // Generate Traps
+    {
+        TArray<FCell> PotentialTraps;
+        GetAllCellsPred([this](int row, int col) -> bool {
+            return Maze[row][col] == ' ' &&
+                (
+                    Maze[row - 1][col] == ' ' && Maze[row + 1][col] == ' '
+                    ||
+                    Maze[row][col - 1] == ' ' && Maze[row][col + 1] == ' '
+                    );
+            }, PotentialTraps);
+        int NumLoops = ((Maze.Num() + Maze[0].Num())) * TrapSpawnFactor;
+        TArray<FCell> Traps;
+        GetRandom(NumLoops, PotentialTraps, Traps);
+
+        for (auto& Cell : Traps)
+        {
+            Maze[Cell.Key][Cell.Value] = 'T';
+        }
+    }
 }
 
 AUE5TopDownARPGGameMode::AUE5TopDownARPGGameMode()
