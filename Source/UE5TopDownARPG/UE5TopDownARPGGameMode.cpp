@@ -9,6 +9,7 @@
 #include "Env/Door.h"
 #include "Maze.h"
 #include "Trigger/FloorTrapTrigger.h"
+#include "CrowdPF/Public/CrowdPF.h"
 
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"

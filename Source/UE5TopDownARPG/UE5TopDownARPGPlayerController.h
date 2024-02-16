@@ -6,6 +6,7 @@
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "Materials/MaterialInterface.h"
 #include "UE5TopDownARPGPlayerController.generated.h"
 
 /** Forward declaration to improve compiling times */
@@ -34,15 +35,24 @@ public:
 	class UInputMappingContext* DefaultMappingContext;
 	
 	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta=(AllowPrivateAccess = "true"))
 	class UInputAction* SetDestinationClickAction;
 
 	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta=(AllowPrivateAccess = "true"))
 	class UInputAction* SetDestinationTouchAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* ActivateAbilityAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta=(AllowPrivateAccess = "true"))
+	class UInputAction* ActivateShowPathsAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ActivateDestroyWallAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ActivateFreeRoamAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
+	UMaterialInterface* OutlineMaterial;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -54,18 +64,28 @@ protected:
 	virtual void BeginPlay();
 
 	/** Input handlers for SetDestination action. */
-	void OnInputStarted();
 	void OnSetDestinationTriggered();
+	// TODO clean?
+	/*void OnInputStarted();
 	void OnSetDestinationReleased();
 	void OnTouchTriggered();
-	void OnTouchReleased();
-	void OnActivateAbilityStarted();
+	void OnTouchReleased();*/
+
+	// Player Abilities
+	void onActivateFreeRoamAction();
+	void onActivateShowPathsAction();
+	void onActivateDestroyWallAction();
+
+	bool CanFreeRoam = false;
 
 private:
 	FVector CachedDestination;
+	AActor* CachedHoveredDoor;
 
 	bool bIsTouch; // Is it a touch device
 	float FollowTime; // For how long it has been pressed
+
+	void Tick(float DeltaTime) override;
 };
 
 
