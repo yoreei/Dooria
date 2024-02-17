@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "Materials/MaterialInterface.h"
+#include "Env/Door.h"
 #include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGPlayerController.generated.h"
 
@@ -81,7 +82,7 @@ protected:
 
 private:
 	FVector CachedDestination;
-	AActor* CachedHoveredDoor;
+	ADoorTrigger* CachedHoveredDoor;
 
 	bool bIsTouch; // Is it a touch device
 	float FollowTime; // For how long it has been pressed

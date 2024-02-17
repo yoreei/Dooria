@@ -41,19 +41,8 @@ void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequ
 
     AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
     if (!ensure(GameMode)) { return; }
-
-    if(!GameMode->UseCrowdPf)
-    {
-        Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
-    }
-    else
-    {
-        FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
-        if (!ensure(GameMode)) { return; }
-
-        CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
-    }
-
+    Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
+  
     if (!GameMode->DrawDebugPath)
     {
         return;

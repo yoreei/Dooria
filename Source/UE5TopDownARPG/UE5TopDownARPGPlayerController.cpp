@@ -72,6 +72,8 @@ void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 	{
 		UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
 		EPathFollowingRequestResult::Type Result = AIController->MoveToActor(CachedHoveredDoor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
+
+		CachedHoveredDoor->CustomClick();
 	}
 }
 
@@ -108,13 +110,24 @@ void AUE5TopDownARPGPlayerController::Tick(float DeltaTime)
 
 		ADoorTrigger* HoveredDoor = Cast<ADoorTrigger>(Actor);
 
-		if (HoveredDoor != CachedHoveredDoor && IsValid(HoveredDoor))
+		if (IsValid(HoveredDoor) && HoveredDoor != CachedHoveredDoor)
 		{
-			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
+			HoveredDoor->CustomHover();
+			UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
+			if (IsValid(CachedHoveredDoor))
+			{
+				CachedHoveredDoor->CustomUnhover();
+				UE_LOG(LogUE5TopDownARPG, Log, TEXT("Unhovered Door: %s"), CachedHoveredDoor);
+			}
+
 		}
-		else if (HoveredDoor != CachedHoveredDoor && !IsValid(HoveredDoor))
+		else if (!IsValid(HoveredDoor) && HoveredDoor != CachedHoveredDoor)
 		{
-			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("HoveredActor (%s) ! = CachedHoveredDoor (%s) "), HoveredDoor, CachedHoveredDoor);
+			if (IsValid(CachedHoveredDoor))
+			{
+				CachedHoveredDoor->CustomUnhover();
+				UE_LOG(LogUE5TopDownARPG, Log, TEXT("Unhovered Door: %s"), CachedHoveredDoor);
+			}
 		}
 		CachedHoveredDoor = HoveredDoor;
 	}
