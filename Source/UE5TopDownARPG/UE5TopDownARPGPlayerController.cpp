@@ -13,6 +13,7 @@
 #include "Logging/StructuredLog.h"
 #include "EnhancedInputSubsystems.h"
 #include "CrowdPF/Public/CrowdPF.h"
+#include "ACrowdPFAIController.h"
 #include "UE5TopDownARPG.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -82,16 +83,28 @@ void AUE5TopDownARPGPlayerController::SetupInputComponent()
 void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 {
 	if (CachedHoveredDoor == nullptr) { return; }
-	APawn* ControlledPawn = GetPawn();
-	if (ControlledPawn != nullptr)
+	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), ACrowdPFAIController::StaticClass());
+	ACrowdPFAIController* AIController = Cast<ACrowdPFAIController>(FoundActor);
+	if (IsValid(AIController))
 	{
 		UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
-		//UAIBlueprintHelperLibrary::SimpleMoveToActor(this, CachedHoveredDoor);
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedHoveredDoor->GetActorLocation());
-		// 
-		//FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-		//ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
+		EPathFollowingRequestResult::Type Result = AIController->MoveToActor(CachedHoveredDoor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
 	}
+	
+	//TArray<AActor*> FoundActors;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADoorTrigger::StaticClass(), FoundActors);
+	//if (FoundActors.Num() >= 1)
+	//{
+	//	ADoorTrigger* DoorTrigger = Cast<ADoorTrigger>(FoundActors[0]);
+	//	if (IsValid(DoorTrigger))
+	//	{
+	//		//UAIBlueprintHelperLibrary::SimpleMoveToActor(this, CachedHoveredDoor);
+	//		//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedHoveredDoor->GetActorLocation());
+	//		// 
+	//		//FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+	//		//ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
+	//	}
+	//}
 }
 
 // TODO clean?

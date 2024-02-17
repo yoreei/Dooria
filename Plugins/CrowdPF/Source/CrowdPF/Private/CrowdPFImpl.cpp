@@ -25,9 +25,6 @@
 
 DEFINE_LOG_CATEGORY(LogCrowdPF)
 
-static const int GridSizeX{ 30 }; // TODO unhardcode
-static const int GridSizeY{ 30 };
-
 void FCrowdPFModule::StartupModule()
 {
 	//FEditorDelegates::BeginPIE.AddRaw(this, &FCrowdPFModule::OnBeginPIE);
@@ -64,7 +61,7 @@ void FCrowdPFModule::Init(UWorld* _World, FCrowdPFOptions Options) { ModuleImple
 
 bool FCrowdPFModule::Impl::IsWall(const FIntVector2& Cell) const
 {
-	return CostFields[Cell.Y * GridSizeX + Cell.X] == UINT8_MAX;
+	return CostFields[Cell.Y * O.Rows + Cell.X] == UINT8_MAX;
 }
 
 /* Begin Eikonal */
@@ -147,7 +144,7 @@ void FCrowdPFModule::Impl::GetLos(const FIntVector2& Cell, const FIntVector2& Go
 void FCrowdPFModule::Impl::VisitCell(std::deque<FIntVector2>& WaveFront, const FIntVector2& Cell, float CurrentCost, const FIntVector2& Goal, OUT std::deque<FIntVector2>& SecondWaveFront, bool bLosPass) {
 	UE_LOG(LogCrowdPF, VeryVerbose, TEXT("VisitCell Processing [%d, %d]"), Cell.X, Cell.Y);
 
-	if (IsInGrid(Cell) == false || IntegrationFields[Cell.Y * GridSizeX + Cell.X].LOS)
+	if (IsInGrid(Cell) == false || IntegrationFields[Cell.Y *  O.Cols + Cell.X].LOS)
 	{
 		return;
 	}
@@ -176,7 +173,7 @@ void FCrowdPFModule::Impl::VisitCell(std::deque<FIntVector2>& WaveFront, const F
 	float NewCost = CurrentCost + CostFields[Idx];
 	float OldCost = IntegrationFields[Idx].IntegratedCost;
 
-	if (NewCost < OldCost * Options.SignificantCostReduction) {
+	if (NewCost < OldCost * O.SignificantCostReduction) {
 		IntegrationFields[Idx].IntegratedCost = NewCost;
 		if (IntegrationFields[Idx].WaveFrontBlocked == false)
 		{
@@ -195,7 +192,7 @@ void FCrowdPFModule::Impl::PropagateWave(std::deque<FIntVector2>& WaveFront, boo
 		FIntVector2 Current = WaveFront.front();
 		WaveFront.pop_front();
 
-		float CurrentCost = IntegrationFields[Current.Y * GridSizeX + Current.X].IntegratedCost;
+		float CurrentCost = IntegrationFields[Current.Y *  O.Cols + Current.X].IntegratedCost;
 
 		VisitCell(WaveFront, FIntVector2(Current.X + 1, Current.Y), CurrentCost, Goal, SecondWaveFront, bLosPass);
 		VisitCell(WaveFront, FIntVector2(Current.X - 1, Current.Y), CurrentCost, Goal, SecondWaveFront, bLosPass);
@@ -302,21 +299,21 @@ void FCrowdPFModule::Impl::CalculateFlowFields()
 void FCrowdPFModule::Impl::CalculateCostFields()
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_CalculateCostFields"), STAT_CrowdPF_CalculateCostFields, STATGROUP_CrowdPF);
-	CostFields.Init(1, GridSizeX * GridSizeY);
+	CostFields.Init(1,  O.Cols * O.Rows);
 	FVector HitLocation;
 	FHitResult OutHit;
-	for (int y = 0; y < GridSizeY; ++y)
+	for (int y = 0; y < O.Rows; ++y)
 	{
-		for (int x = 0; x < GridSizeX; ++x)
+		for (int x = 0; x <  O.Cols; ++x)
 		{
-			FVector Start = Options.CostTraceYStart + FVector(x * Options.CellSize + Options.CellSize / 2, y * Options.CellSize + Options.CellSize / 2, 0.f);
-			FVector End = Start + Options.CostTraceDirection;
+			FVector Start = O.CostTraceYStart + FVector(x * O.CellSize + O.CellSize / 2, y * O.CellSize + O.CellSize / 2, 0.f);
+			FVector End = Start + O.CostTraceDirection;
 
 			FCollisionObjectQueryParams ObjectQueryParams(FCollisionObjectQueryParams::AllObjects);
 			ObjectQueryParams.RemoveObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
 			bool bLineTraceObstructed = pWorld->LineTraceSingleByObjectType(OutHit, Start, End, ObjectQueryParams);
 
-			CostFields[y * GridSizeX + x] = bLineTraceObstructed ? UINT8_MAX : 1;
+			CostFields[y *  O.Cols + x] = bLineTraceObstructed ? UINT8_MAX : 1;
 		}
 	}
 }
@@ -353,20 +350,20 @@ void FCrowdPFModule::Impl::DoFlowTiles(const FVector& WorldOrigin, const FVector
 		WaveFront.push_back(Goal);
 		std::deque<FIntVector2> SecondWaveFront;
 		std::deque<FIntVector2> DummyWaveFront; // TODO refactor
-		IntegrationFields.Init({ FLT_MAX, false, false }, GridSizeX * GridSizeY);
-		IntegrationFields[Goal.Y * GridSizeX + Goal.X].IntegratedCost = 0;
-		IntegrationFields[Goal.Y * GridSizeX + Goal.X].LOS = true;
+		IntegrationFields.Init({ FLT_MAX, false, false },  O.Cols * O.Rows);
+		IntegrationFields[Goal.Y *  O.Cols + Goal.X].IntegratedCost = 0;
+		IntegrationFields[Goal.Y *  O.Cols + Goal.X].LOS = true;
 		PropagateWave(WaveFront, /*bLosPass =*/ true, Goal, SecondWaveFront);
 		PropagateWave(SecondWaveFront, /*bLosPass =*/ false, Goal, DummyWaveFront); // todo templating
 
 		// Flow Fields
-		FlowFields.Init({ Dirs::EDirection(), false, 0 }, GridSizeX * GridSizeY); // TODO optimize: can we omit constructing these?
+		FlowFields.Init({ Dirs::EDirection(), false, 0 },  O.Cols * O.Rows); // TODO optimize: can we omit constructing these?
 		CalculateFlowFields();
 
 		SetNeedToRecalculate(false);
 
 		// Debug
-		if (Options.bDebugDraw)
+		if (O.bDebugDraw)
 		{
 			DrawCoords();
 			DrawCosts();
@@ -381,48 +378,48 @@ void FCrowdPFModule::Impl::DoFlowTiles(const FVector& WorldOrigin, const FVector
 void FCrowdPFModule::Impl::Init(UWorld* _World, FCrowdPFOptions _Options)
 {
 	pWorld = _World;
-	Options = _Options;
+	O = _Options;
 	CalculateCostFields();
 }
 
 void FCrowdPFModule::Impl::DrawCosts()
 {
-	if (!Options.bDrawCosts)
+	if (!O.bDrawCosts)
 	{
 		return;
 	}
 	ensure(pWorld);
-	for (int y = 0; y < GridSizeY; ++y)
+	for (int y = 0; y < O.Rows; ++y)
 	{
-		for (int x = 0; x < GridSizeX; ++x)
+		for (int x = 0; x <  O.Cols; ++x)
 		{
-			FVector RayStart = Options.CostTraceYStart + FVector(x * Options.CellSize + Options.CellSize / 2, y * Options.CellSize + Options.CellSize / 2, 0.f);
-			FVector RayEnd = RayStart + Options.CostTraceDirection;
-			// UE_LOG(LogCrowdPF, Log, TEXT("CostFields [%d][%d] = [%d]"),i, j, CostFields[i * GridSizeX + j]);
-			DrawDebugDirectionalArrow(pWorld, RayStart, RayEnd, 3.0f, CostFields[y * GridSizeX + x] == UINT8_MAX ? FColor::Red : FColor::Green, true, -1.f, 0, 15.f);
+			FVector RayStart = O.CostTraceYStart + FVector(x * O.CellSize + O.CellSize / 2, y * O.CellSize + O.CellSize / 2, 0.f);
+			FVector RayEnd = RayStart + O.CostTraceDirection;
+			// UE_LOG(LogCrowdPF, Log, TEXT("CostFields [%d][%d] = [%d]"),i, j, CostFields[i *  O.Cols + j]);
+			DrawDebugDirectionalArrow(pWorld, RayStart, RayEnd, 3.0f, CostFields[y *  O.Cols + x] == UINT8_MAX ? FColor::Red : FColor::Green, true, -1.f, 0, 15.f);
 		}
 	}
 }
 
 void FCrowdPFModule::Impl::DrawIntegration()
 {
-	if (!Options.bDrawIntegration)
+	if (!O.bDrawIntegration)
 	{
 		return;
 	}
 	ensure(pWorld);
 	FlushPersistentDebugLines(pWorld);
 
-	for (int y = 0; y < GridSizeY; ++y)
+	for (int y = 0; y < O.Rows; ++y)
 	{
-		for (int x = 0; x < GridSizeX; ++x)
+		for (int x = 0; x <  O.Cols; ++x)
 		{
 			FActorSpawnParameters SpawnParameters;
 			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 			{
-				FVector TextStart = { x * Options.CellSize + Options.HCellSize(), y * Options.CellSize + Options.HCellSize() , Options.TextHeight()}; // Top corner of cell
-				auto IntegratedCost = FString::FromInt(IntegrationFields[y * GridSizeX + x].IntegratedCost);
-				if (IntegrationFields[y * GridSizeX + x].IntegratedCost == FLT_MAX)
+				FVector TextStart = { x * O.CellSize + O.HCellSize(), y * O.CellSize + O.HCellSize() , O.TextHeight()}; // Top corner of cell
+				auto IntegratedCost = FString::FromInt(IntegrationFields[y *  O.Cols + x].IntegratedCost);
+				if (IntegrationFields[y *  O.Cols + x].IntegratedCost == FLT_MAX)
 				{
 					IntegratedCost = "MAX";
 				}
@@ -433,25 +430,25 @@ void FCrowdPFModule::Impl::DrawIntegration()
 			}
 
 			{
-				FVector TextStart = { x * Options.CellSize + Options.HCellSize(), y * Options.CellSize + Options.QCellSize(), Options.TextHeight()}; // Top corner of cell
-				FString WaveFrontBlocked = IntegrationFields[y * GridSizeX + x].WaveFrontBlocked ? "|" : "";
+				FVector TextStart = { x * O.CellSize + O.HCellSize(), y * O.CellSize + O.QCellSize(), O.TextHeight()}; // Top corner of cell
+				FString WaveFrontBlocked = IntegrationFields[y *  O.Cols + x].WaveFrontBlocked ? "|" : "";
 				auto TextActor = pWorld->SpawnActor<ATextRenderActor>(ATextRenderActor::StaticClass(), TextStart, FRotator(90, 0, 180), SpawnParameters);
 				TextActor->GetTextRender()->SetText(FText::FromString(WaveFrontBlocked));
 				TextActor->GetTextRender()->SetTextRenderColor(FColor::Black);
 			}
 
 			{
-				FVector RayStart = Options.CostTraceYStart + FVector(x * Options.CellSize + Options.CellSize / 2, y * Options.CellSize + Options.CellSize / 2, 0.f);
-				FVector RayEnd = RayStart + Options.CostTraceDirection;
-				// UE_LOG(LogCrowdPF, Log, TEXT("CostFields [%d][%d] = [%d]"),i, j, CostFields[i * GridSizeX + j]);
+				FVector RayStart = O.CostTraceYStart + FVector(x * O.CellSize + O.CellSize / 2, y * O.CellSize + O.CellSize / 2, 0.f);
+				FVector RayEnd = RayStart + O.CostTraceDirection;
+				// UE_LOG(LogCrowdPF, Log, TEXT("CostFields [%d][%d] = [%d]"),i, j, CostFields[i *  O.Cols + j]);
 				FVector Points[]{
 					{5.f, 5.f, 0.f},
-					{Options.CellSize - 5.f, Options.CellSize - 5.f, 0.f}
+					{O.CellSize - 5.f, O.CellSize - 5.f, 0.f}
 				};
 				FBox Box{ Points, 2 };
-				FTransform Transform{ FVector(x * Options.CellSize, y * Options.CellSize, Options.LosFlagHeight()) };
-				FColor Color = IntegrationFields[y * GridSizeX + x].LOS ? FColor::White : FColor::Blue;
-				if (IntegrationFields[y * GridSizeX + x].LOS == false)
+				FTransform Transform{ FVector(x * O.CellSize, y * O.CellSize, O.LosFlagHeight()) };
+				FColor Color = IntegrationFields[y *  O.Cols + x].LOS ? FColor::White : FColor::Blue;
+				if (IntegrationFields[y *  O.Cols + x].LOS == false)
 				{
 					int a = 5;
 				}
@@ -467,21 +464,21 @@ void FCrowdPFModule::Impl::DrawIntegration()
 
 void FCrowdPFModule::Impl::DrawFlows()
 {
-	if (!Options.bDrawFlows)
+	if (!O.bDrawFlows)
 	{
 		return;
 	}
 
 	ensure(pWorld);
-	FVector Ray{ 0.f, 0.f, Options.FlowArrowHeight()};
+	FVector Ray{ 0.f, 0.f, O.FlowArrowHeight()};
 
-	for (int y = 0; y < GridSizeY; ++y)
+	for (int y = 0; y < O.Rows; ++y)
 	{
-		for (int x = 0; x < GridSizeX; ++x)
+		for (int x = 0; x <  O.Cols; ++x)
 		{
-			if (FlowFields[y * GridSizeX + x].Completed == true)
+			if (FlowFields[y *  O.Cols + x].Completed == true)
 			{
-				Dirs::EDirection Dir = FlowFields[y * GridSizeX + x].Dir;
+				Dirs::EDirection Dir = FlowFields[y *  O.Cols + x].Dir;
 				FIntVector2 IntOffset = Dirs::DIRS.at(Dir) * 25;
 				FVector Offset{ IntOffset.X * 1.f, IntOffset.Y * 1.f, 0.f };
 				Ray.Y = y * 100.f + 50;
@@ -490,9 +487,9 @@ void FCrowdPFModule::Impl::DrawFlows()
 				FVector Start = Ray - Offset;
 				FVector End = Ray + Offset;
 
-				DrawDebugDirectionalArrow(pWorld, Start, End, 3.f, FColor::Green, true, 9999999.f, 0,  Options.QCellSize() / 2.f);
+				DrawDebugDirectionalArrow(pWorld, Start, End, 3.f, FColor::Green, true, 9999999.f, 0,  O.QCellSize() / 2.f);
 
-				//UE_LOG(LogCrowdPF, Log, TEXT("FlowFields[%d][%d].Dir = [%d]"), y, x, (int)FlowFields[y * GridSizeX + x].Dir);
+				//UE_LOG(LogCrowdPF, Log, TEXT("FlowFields[%d][%d].Dir = [%d]"), y, x, (int)FlowFields[y *  O.Cols + x].Dir);
 				//UE_LOG(LogCrowdPF, Log, TEXT("Start = %s"), *Start.ToString());
 				//UE_LOG(LogCrowdPF, Log, TEXT("End = %s"), *End.ToString());
 			}
@@ -504,11 +501,11 @@ void FCrowdPFModule::Impl::DrawBox(FIntVector2 At, FColor Color)
 {
 	ensure(pWorld);
 	FVector Center{
-		At.X * Options.CellSize + Options.HCellSize(),
-		At.Y * Options.CellSize + Options.HCellSize(),
+		At.X * O.CellSize + O.HCellSize(),
+		At.Y * O.CellSize + O.HCellSize(),
 		60.f
 	};
-	FVector Extent = FVector( Options.QCellSize(),  Options.QCellSize(),  Options.QCellSize());
+	FVector Extent = FVector( O.QCellSize(),  O.QCellSize(),  O.QCellSize());
 	DrawDebugBox(pWorld, Center, Extent, Color, true);
 	//UE_LOG(LogCrowdPF, Log, TEXT("Draw Box: Center = %s; Extent = %s"), *Center.ToString(), *Extent.ToString());
 }
@@ -520,18 +517,18 @@ void FCrowdPFModule::Impl::DrawBox(int At, FColor Color)
 
 void FCrowdPFModule::Impl::DrawCoords()
 {
-	if (!Options.bDrawCoords)
+	if (!O.bDrawCoords)
 	{
 		return;
 	}
 	ensure(pWorld);
-	DrawDebugCoordinateSystem(pWorld, { 0.f, 0.f, 0.f }, FRotator(0.f), Options.CellSize, true);
+	DrawDebugCoordinateSystem(pWorld, { 0.f, 0.f, 0.f }, FRotator(0.f), O.CellSize, true);
 
-	for (int y = 0; y < GridSizeY; ++y)
+	for (int y = 0; y < O.Rows; ++y)
 	{
-		for (int x = 0; x < GridSizeX; ++x)
+		for (int x = 0; x <  O.Cols; ++x)
 		{
-			FVector TextStart = { x * Options.CellSize +  Options.QCellSize(), y * Options.CellSize, Options.TextHeight()}; // Bottom part of cell // TODO why x,y reversed?
+			FVector TextStart = { x * O.CellSize +  O.QCellSize(), y * O.CellSize, O.TextHeight()}; // Bottom part of cell // TODO why x,y reversed?
 
 			// UE_LOG(LogCrowdPF, Log, TEXT("IntegrationFields [%d][%d] = [%s]"), i, j, *IntegratedCost
 			FText Coords = FText::FromString(" [" + FString::FromInt(x) + ", " + FString::FromInt(y) + "]");
@@ -547,13 +544,13 @@ void FCrowdPFModule::Impl::DrawCoords()
 #define BREAK_IF_EQUAL(current, at) if ((current) == (at)) { __debugbreak(); }
 
 const int FCrowdPFModule::Impl::ApplyDir(const int Idx, const FIntVector2& Dir) {
-	int Result = Idx + Dir.Y * GridSizeX + Dir.X;
+	int Result = Idx + Dir.Y *  O.Cols + Dir.X;
 	return Result;
 }
 
 bool FCrowdPFModule::Impl::IsInGrid(int X, int Y)
 {
-	return X >= 0 && X < GridSizeX && Y >= 0 && Y < GridSizeY;
+	return X >= 0 && X <  O.Cols && Y >= 0 && Y < O.Rows;
 }
 
 bool FCrowdPFModule::Impl::IsInGrid(const FIntVector2& Cell) {
@@ -562,33 +559,33 @@ bool FCrowdPFModule::Impl::IsInGrid(const FIntVector2& Cell) {
 
 bool FCrowdPFModule::Impl::IsInGrid(int Idx)
 {
-	int X = Idx % GridSizeX;
-	int Y = Idx / GridSizeX;
+	int X = Idx %  O.Cols;
+	int Y = Idx /  O.Cols;
 	return IsInGrid(X, Y);
 }
 
 FIntVector2 FCrowdPFModule::Impl::ToFIntVector2(int LinearIdx)
 {
 	return FIntVector2(
-		LinearIdx % GridSizeX,
-		LinearIdx / GridSizeX
+		LinearIdx %  O.Cols,
+		LinearIdx /  O.Cols
 	);
 }
 
 FIntVector2 FCrowdPFModule::Impl::WorldVectToGridVect(const FVector& Vect)
 {
 	return FIntVector2(
-		Vect.X / Options.CellSize,
-		Vect.Y / Options.CellSize
+		Vect.X / O.CellSize,
+		Vect.Y / O.CellSize
 	);
 }
 
 FVector FCrowdPFModule::Impl::GridVectToWorldVect(const FIntVector2& Vect)
 {
 	return FVector(
-		Vect.X * Options.CellSize + Options.HCellSize(),
-		Vect.Y * Options.CellSize + Options.HCellSize(),
-		Options.PlaneHeight
+		Vect.X * O.CellSize + O.HCellSize(),
+		Vect.Y * O.CellSize + O.HCellSize(),
+		O.PlaneHeight
 	);
 }
 
@@ -603,7 +600,7 @@ FIntVector2 FCrowdPFModule::Impl::ToFIntVector2(FVector Vect)
 
 int FCrowdPFModule::Impl::ToLinearIdx(FIntVector2 IntVector2)
 {
-	return IntVector2.Y * GridSizeX + IntVector2.X;
+	return IntVector2.Y *  O.Cols + IntVector2.X;
 }
 
 FVector2D FCrowdPFModule::Impl::ToVector2D(const FIntVector2& IntVector2)
@@ -616,7 +613,7 @@ FVector2D FCrowdPFModule::Impl::ToVector2D(const FIntVector2& IntVector2)
 
 bool FCrowdPFModule::Impl::IsValidIdx(int Idx)
 {
-	return Idx >= 0 && Idx < GridSizeX * GridSizeY;
+	return Idx >= 0 && Idx <  O.Cols * O.Rows;
 }
 
 FVector FCrowdPFModule::Impl::addZ(FVector2D Vect, float Z)

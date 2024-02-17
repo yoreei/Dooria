@@ -529,10 +529,13 @@ void AUE5TopDownARPGGameMode::StartPlay()
 
     // bug: uncommenting this makes the maze spawn doors for every path
     FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
-    //if (CrowdPFModule)
-    //{
-    //    CrowdPFModule->Init(pWorld, Options);
-    //}
+    if (CrowdPFModule)
+    {
+        Options.CellSize = CellSize;
+        Options.Rows = rows;
+        Options.Cols = cols;
+        CrowdPFModule->Init(pWorld, Options);
+    }
 
 	Super::StartPlay();
 
