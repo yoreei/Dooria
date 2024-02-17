@@ -24,6 +24,12 @@ struct CROWDPF_API FCrowdPFOptions {
     float CellSize = 100.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
+    int Rows = 21;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
+    int Cols = 21;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
     float PlaneHeight = 51.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")

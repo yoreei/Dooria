@@ -17,20 +17,11 @@ ACrowdPFAIController::ACrowdPFAIController()
 void ACrowdPFAIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
-    UE_LOGFMT(LogUE5TopDownARPG, Log, "Possessed {0} ", *InPawn->GetActorNameOrLabel());
 }
 
 void ACrowdPFAIController::BeginPlay()
 {
     Super::BeginPlay();
-
-    //TArray<AActor*> FoundActors;
-    //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADoorTrigger::StaticClass(), FoundActors);
-    //if (ensure(FoundActors.Num() >= 1 && IsValid(FoundActors[0])))
-    //{
-    //    AActor* GoalActor = FoundActors[0];
-    //    EPathFollowingRequestResult::Type Result = MoveToActor(GoalActor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
-    //}
 }
 
 /*
@@ -42,8 +33,10 @@ void ACrowdPFAIController::BeginPlay()
     <run benchmark>
     trace.stop
 */
+
 void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
 {
+    UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
     DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_FindPathForMoveRequest"), STAT_CrowdPF_FindPathForMoveRequest, STATGROUP_CrowdPF);
 
     AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
@@ -59,7 +52,6 @@ void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequ
         if (!ensure(GameMode)) { return; }
 
         CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
-
     }
 
     if (!GameMode->DrawDebugPath)
@@ -69,11 +61,14 @@ void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequ
 
     UWorld* pWorld = GetWorld();
     ensure(pWorld);
-    const TArray<FNavPathPoint>& PathPoints = OutPath->GetPathPoints();
-    for (const FNavPathPoint& Point : PathPoints)
+    if (ensure(OutPath))
     {
-        Chaos::TVector<double, 3> Loc = Point.Location;
-        FVector loc2 = Point.Location;
-        DrawDebugBox(pWorld, loc2, {20.f, 20.f, 20.f}, FColor::Black, true, -1.f, 0, 5.f);
+        const TArray<FNavPathPoint>& PathPoints = OutPath->GetPathPoints();
+        for (const FNavPathPoint& Point : PathPoints)
+        {
+            Chaos::TVector<double, 3> Loc = Point.Location;
+            FVector loc2 = Point.Location;
+            DrawDebugBox(pWorld, loc2, {20.f, 20.f, 20.f}, FColor::Black, true, -1.f, 0, 5.f);
+        }
     }
 }

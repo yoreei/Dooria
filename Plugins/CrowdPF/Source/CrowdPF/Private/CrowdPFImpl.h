@@ -63,7 +63,7 @@ private:
 
 	UWorld* pWorld;
 	const float SQRT_OF_2 = FMath::Sqrt(2.f);
-	FCrowdPFOptions Options;
+	FCrowdPFOptions O;
 
 	bool IsWall(const FIntVector2& Cell) const;
 
