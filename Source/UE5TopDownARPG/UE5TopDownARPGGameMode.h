@@ -94,6 +94,9 @@ public:
 	float CameraZFactor = 1.9;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	FRotator CameraRotator{ -70.f, 0.f, 0.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	float CellSize = 128.f;
 
 

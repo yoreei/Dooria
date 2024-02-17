@@ -383,13 +383,15 @@ void AUE5TopDownARPGGameMode::SpawnCamera()
     APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
     if (PlayerController)
     {
-        float MidX = (Maze[0].Num() / 2) * CellSize;
-        float MidY = (Maze.Num() / 2) * CellSize;
-        float MidZ = FMath::Max(MidX, MidY) * CameraZFactor;
+        float MaxX = Maze[0].Num() * CellSize;
+        float MaxY = Maze.Num() * CellSize;
+        float CamX = MaxX / 2;
+        float CamY = 0;
+        float CamZ = FMath::Max(MaxX, MaxY) * CameraZFactor;
 
-        FVector Location = { MidX, MidY, MidZ };
+        FVector Location = { CamY, CamX, CamZ };
         FActorSpawnParameters SpawnParams;
-        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, FRotator(-80.f, 0.f, 0.f), SpawnParams);
+        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, CameraRotator, SpawnParams);
 
         if (CameraActor)
         {
