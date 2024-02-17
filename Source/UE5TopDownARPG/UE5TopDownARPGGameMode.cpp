@@ -512,6 +512,12 @@ void AUE5TopDownARPGGameMode::PrintMaze(FString PrintTag)
 
 void AUE5TopDownARPGGameMode::StartPlay()
 {
+    SetupDooria();
+	Super::StartPlay();
+}
+
+void AUE5TopDownARPGGameMode::SetupDooria()
+{
     srand(static_cast<unsigned>(time(nullptr)));
     UWorld* pWorld = GetWorld();
     ensure(pWorld);
@@ -527,16 +533,22 @@ void AUE5TopDownARPGGameMode::StartPlay()
     PrintMaze("After GenerateLightSources");
     SpawnCamera();
 
-    // bug: uncommenting this makes the maze spawn doors for every path
-    FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
-    if (CrowdPFModule)
+    //FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
+    //if (CrowdPFModule)
+    //{
+    //    Options.CellSize = CellSize;
+    //    Options.Rows = rows;
+    //    Options.Cols = cols;
+    //    CrowdPFModule->Init(pWorld, Options);
+    //}
+}
+
+void AUE5TopDownARPGGameMode::AdvanceLevel()
+{
+    CurrentLevel++;
+    if (CurrentLevel == ReachLevelToWin)
     {
-        Options.CellSize = CellSize;
-        Options.Rows = rows;
-        Options.Cols = cols;
-        CrowdPFModule->Init(pWorld, Options);
+        EndGame(true);
     }
-
-	Super::StartPlay();
-
+    SetupDooria();
 }
