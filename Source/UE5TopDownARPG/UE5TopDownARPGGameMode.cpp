@@ -128,8 +128,6 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
         }
     }
 
-    PrintMaze();
-
     // Add Loops in Maze
     {
         TArray<FCell> PotentialLoops;
@@ -338,11 +336,11 @@ ADooriaPath* AUE5TopDownARPGGameMode::SpawnPathAtGridLoc(int i, int j)
         ACharacter* SpawnedCharacter = Cast<ACharacter>(BasicSpawn(i, j, CharacterClass));
         if (ensure(SpawnedCharacter))
         {
-            APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-            if (PlayerController)
-            {
-                PlayerController->Possess(SpawnedCharacter);
-            }
+            //APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+            //if (PlayerController)
+            //{
+            //    PlayerController->Possess(SpawnedCharacter);
+            //}
         }
 
     }
@@ -494,8 +492,9 @@ FVector AUE5TopDownARPGGameMode::CalculateUELocation(int i, int j)
     return FVector(i * CellSize, j * CellSize, 0);
 }
 
-void AUE5TopDownARPGGameMode::PrintMaze()
+void AUE5TopDownARPGGameMode::PrintMaze(FString PrintTag)
 {
+    UE_LOG(LogTemp, Warning, TEXT("%s"), *PrintTag);
     for (const auto& row : Maze) {
         FString RowString;
         for (auto& cell : row) {
@@ -504,7 +503,8 @@ void AUE5TopDownARPGGameMode::PrintMaze()
                 cell.hasDoor                ? 'D' :
                 cell.hasTrap                ? 'T' :
                 cell.isPlayerStart          ? 'S' :
-                cell.Type == CellType::Path ? ' ' : '0'); // 0 should never happen
+                cell.Type == CellType::Path ? ' ' :
+                cell.Type == CellType::NONE ? 'N' : '0'); // 0 should never happen
         }
         UE_LOG(LogTemp, Warning, TEXT("%s"), *RowString);
     }
@@ -520,11 +520,19 @@ void AUE5TopDownARPGGameMode::StartPlay()
     int32 cols = 21; // Must be odd
 
     InitializeMaze(rows, cols);
+    PrintMaze("After InitializeMaze:");
     GenerateMaze(rows, cols);
     SpawnMaze();
     GenerateLightSources();
+    PrintMaze("After GenerateLightSources");
     SpawnCamera();
-    PrintMaze();
+
+    // bug: uncommenting this makes the maze spawn doors for every path
+    FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
+    //if (CrowdPFModule)
+    //{
+    //    CrowdPFModule->Init(pWorld, Options);
+    //}
 
 	Super::StartPlay();
 

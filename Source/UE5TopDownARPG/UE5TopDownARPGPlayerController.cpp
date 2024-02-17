@@ -14,6 +14,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPG.h"
+#include <Kismet/GameplayStatics.h>
 
 AUE5TopDownARPGPlayerController::AUE5TopDownARPGPlayerController()
 {
@@ -80,29 +81,16 @@ void AUE5TopDownARPGPlayerController::SetupInputComponent()
 // Triggered every frame when the input is held down
 void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 {
-	FollowTime += GetWorld()->GetDeltaSeconds();
-	
-	FHitResult Hit;
-	bool bHitSuccessful = false;
-	if (bIsTouch)
-	{
-		bHitSuccessful = GetHitResultUnderFinger(ETouchIndex::Touch1, ECollisionChannel::ECC_Visibility, true, Hit);
-	}
-	else
-	{
-		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
-	}
-
-	if (bHitSuccessful)
-	{
-		CachedDestination = Hit.Location;
-	}
-	
+	if (CachedHoveredDoor == nullptr) { return; }
 	APawn* ControlledPawn = GetPawn();
 	if (ControlledPawn != nullptr)
 	{
-		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-		ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
+		UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
+		//UAIBlueprintHelperLibrary::SimpleMoveToActor(this, CachedHoveredDoor);
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedHoveredDoor->GetActorLocation());
+		// 
+		//FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		//ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
 	}
 }
 
@@ -189,18 +177,18 @@ void AUE5TopDownARPGPlayerController::Tick(float DeltaTime)
 
 		ADoorTrigger* HoveredDoor = Cast<ADoorTrigger>(Actor);
 
-		if (Actor)
-		{
-			UE_LOGFMT(LogUE5TopDownARPG, Log, "Hovered Actor: {0} of type {1} is door: {2}", *Actor->GetActorNameOrLabel(), *Actor->GetClass()->GetName(), IsValid(HoveredDoor));
-		}
+		//if (Actor)
+		//{
+		//	//UE_LOGFMT(LogUE5TopDownARPG, Log, "Hovered Actor: {0} of type {1} is door: {2}", *Actor->GetActorNameOrLabel(), *Actor->GetClass()->GetName(), IsValid(HoveredDoor));
+		//}
 
 		if (HoveredDoor != CachedHoveredDoor && IsValid(HoveredDoor))
 		{
-			UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
+			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
 		}
 		else if (HoveredDoor != CachedHoveredDoor && !IsValid(HoveredDoor))
 		{
-			UE_LOG(LogUE5TopDownARPG, Log, TEXT("HoveredActor (%s) ! = CachedHoveredDoor (%s) "), HoveredDoor, CachedHoveredDoor);
+			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("HoveredActor (%s) ! = CachedHoveredDoor (%s) "), HoveredDoor, CachedHoveredDoor);
 		}
 		CachedHoveredDoor = HoveredDoor;
 	}

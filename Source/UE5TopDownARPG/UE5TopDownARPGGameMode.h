@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Env/Cell.h"
 #include "Maze.h"
+#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -38,7 +39,7 @@ public:
 
 	void GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops);
 
-	void PrintMaze();
+	void PrintMaze(FString PrintTag);
 
 	void GenerateLightSources();
 
@@ -99,6 +100,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	float CellSize = 128.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	bool UseCrowdPf = true;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	bool DrawDebugPath = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
+	FCrowdPFOptions Options;
 
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;
