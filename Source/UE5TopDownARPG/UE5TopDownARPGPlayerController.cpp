@@ -85,7 +85,7 @@ void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 			if (IsValid(AIController))
 			{
 				UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Location: {0}", *Hit.Location.ToString());
-				EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(Hit.Location, 100.f, false, /*bUsePathFinding*/ true, false, false, NULL, /* bAllowPartialPaths */ true);
+				EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(Hit.Location, 100.f, false, /*bUsePathFinding*/ false, false, false, NULL, /* bAllowPartialPaths */ true);
 			}
 		}
 
