@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "Materials/MaterialInterface.h"
+#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGPlayerController.generated.h"
 
 /** Forward declaration to improve compiling times */

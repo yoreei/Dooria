@@ -27,7 +27,7 @@ FString Int32ToBinaryString(int32 Value)
     return BinaryString;
 }
 
-void ADooriaPath::setWallBitMask(int32 Val)
+void ADooriaPath::SetWallBitMask(int32 Val)
 {
 	WallBitMaskDec = Val;
     WallBitMaskBin = Int32ToBinaryString(Val);

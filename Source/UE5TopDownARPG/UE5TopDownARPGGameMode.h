@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Env/Cell.h"
 #include "Maze.h"
+#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -38,19 +39,15 @@ public:
 
 	void GetAllCellsPred(std::function<bool(int, int)> Pred, TArray<FCell>& PotentialLoops);
 
-	void PrintMaze();
+	void PrintMaze(FString PrintTag);
+
+	void GenerateLightSources();
 
 	// Spawn Methods
 
 	void SpawnMaze();
 
 	void SpawnCamera();
-
-	void SpawnPlayerAtGridLoc(int i, int j);
-
-	void SpawnDoorAtGridLoc(int i, int j);
-
-	void SpawnFloorTrapAtGridLoc(int i, int j);
 
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
@@ -70,25 +67,25 @@ public:
 	
 	void StartPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> WallClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> DoorClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> PathClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> CharacterClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> FloorTrapClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float LoopinessFactor = 1.f;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Dooria|MazeGen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float TrapSpawnFactor = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
@@ -98,8 +95,19 @@ public:
 	float CameraZFactor = 1.9;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	FRotator CameraRotator{ -70.f, 0.f, 0.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	float CellSize = 128.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	bool UseCrowdPf = true;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
+	bool DrawDebugPath = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
+	FCrowdPFOptions Options;
 
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;

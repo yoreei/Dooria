@@ -31,11 +31,10 @@ class MazeCell {
 public:
 	MazeCell(CellType _Type) : Type(_Type){}
 	// is
-	CellType Type;
+	CellType Type = CellType::NONE;
 
 	// Components
-	bool hasLightSource;
-	bool hasTrap;
-	bool hasDoor;
-	bool isPlayerStart;
+	bool hasTrap = false;
+	bool hasDoor = false;
+	bool isPlayerStart = false;
 };
