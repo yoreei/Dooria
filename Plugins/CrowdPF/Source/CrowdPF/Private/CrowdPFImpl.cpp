@@ -58,10 +58,20 @@ FCrowdPFModule& FCrowdPFModule::operator=(FCrowdPFModule&&) = default;
 void FCrowdPFModule::DoFlowTiles(const FVector& WorldOrigin, const FVector& WorldGoal, OUT FNavPathSharedPtr& OutPath) { ModuleImplementation->DoFlowTiles(WorldOrigin, WorldGoal, OutPath); }
 void FCrowdPFModule::Init(UWorld* _World, FCrowdPFOptions Options) { ModuleImplementation->Init(_World, Options); } // TODO better handling of World?
 
+float FCrowdPFModule::Impl::toUU(int Val, bool isX = true)
+{
+	return (Val * O.CellSize) + (isX ? O.OffsetX : O.OffsetY);
+
+}
 
 bool FCrowdPFModule::Impl::IsWall(const FIntVector2& Cell) const
 {
-	return CostFields[Cell.Y * O.Rows + Cell.X] == UINT8_MAX;
+	int Idx = Cell.Y * O.Rows + Cell.X;
+	if (ensure(IsValidIdx(Idx)))
+	{
+		return CostFields[Idx] == UINT8_MAX;
+	}
+	return false;
 }
 
 /* Begin Eikonal */
