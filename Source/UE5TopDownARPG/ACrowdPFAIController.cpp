@@ -36,24 +36,13 @@ void ACrowdPFAIController::BeginPlay()
 
 void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
 {
-    UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
+    //UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
     DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_FindPathForMoveRequest"), STAT_CrowdPF_FindPathForMoveRequest, STATGROUP_CrowdPF);
 
     AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
     if (!ensure(GameMode)) { return; }
-
-    if(!GameMode->UseCrowdPf)
-    {
-        Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
-    }
-    else
-    {
-        FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
-        if (!ensure(GameMode)) { return; }
-
-        CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
-    }
-
+    Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
+  
     if (!GameMode->DrawDebugPath)
     {
         return;

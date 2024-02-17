@@ -14,6 +14,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "CrowdPF/Public/CrowdPF.h"
 #include "ACrowdPFAIController.h"
+#include "UE5TopDownARPGGameMode.h"
 #include "UE5TopDownARPG.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -65,14 +66,45 @@ void AUE5TopDownARPGPlayerController::SetupInputComponent()
 // Triggered every frame when the input is held down
 void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 {
-	if (CachedHoveredDoor == nullptr) { return; }
-	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), ACrowdPFAIController::StaticClass());
-	ACrowdPFAIController* AIController = Cast<ACrowdPFAIController>(FoundActor);
-	if (IsValid(AIController))
+	AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
+	if (!ensure(GameMode)) { return; }
+	
+	if (GameMode->CanMoveAnywhere)
 	{
-		UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
-		EPathFollowingRequestResult::Type Result = AIController->MoveToActor(CachedHoveredDoor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
+		FHitResult Hit;
+		bool bHitSuccessful = false;
+		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
+		if (bHitSuccessful)
+		{
+			
+			//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
+			//UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+
+			AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), ACrowdPFAIController::StaticClass());
+			ACrowdPFAIController* AIController = Cast<ACrowdPFAIController>(FoundActor);
+			if (IsValid(AIController))
+			{
+				UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Location: {0}", *Hit.Location.ToString());
+				EPathFollowingRequestResult::Type Result = AIController->MoveToLocation(Hit.Location, 100.f, false, /*bUsePathFinding*/ true, false, false, NULL, /* bAllowPartialPaths */ true);
+			}
+		}
+
+
+
 	}
+	else {
+		if (CachedHoveredDoor == nullptr) { return; }
+		AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), ACrowdPFAIController::StaticClass());
+		ACrowdPFAIController* AIController = Cast<ACrowdPFAIController>(FoundActor);
+		if (IsValid(AIController))
+		{
+			UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
+			EPathFollowingRequestResult::Type Result = AIController->MoveToActor(CachedHoveredDoor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
+
+			CachedHoveredDoor->CustomClick();
+		}
+	}
+
 }
 
 void AUE5TopDownARPGPlayerController::onActivateShowPathsAction()
@@ -108,13 +140,24 @@ void AUE5TopDownARPGPlayerController::Tick(float DeltaTime)
 
 		ADoorTrigger* HoveredDoor = Cast<ADoorTrigger>(Actor);
 
-		if (HoveredDoor != CachedHoveredDoor && IsValid(HoveredDoor))
+		if (IsValid(HoveredDoor) && HoveredDoor != CachedHoveredDoor)
 		{
-			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
+			HoveredDoor->CustomHover();
+			UE_LOG(LogUE5TopDownARPG, Log, TEXT("Hovered Door: %s"), HoveredDoor);
+			if (IsValid(CachedHoveredDoor))
+			{
+				CachedHoveredDoor->CustomUnhover();
+				UE_LOG(LogUE5TopDownARPG, Log, TEXT("Unhovered Door: %s"), CachedHoveredDoor);
+			}
+
 		}
-		else if (HoveredDoor != CachedHoveredDoor && !IsValid(HoveredDoor))
+		else if (!IsValid(HoveredDoor) && HoveredDoor != CachedHoveredDoor)
 		{
-			//UE_LOG(LogUE5TopDownARPG, Log, TEXT("HoveredActor (%s) ! = CachedHoveredDoor (%s) "), HoveredDoor, CachedHoveredDoor);
+			if (IsValid(CachedHoveredDoor))
+			{
+				CachedHoveredDoor->CustomUnhover();
+				UE_LOG(LogUE5TopDownARPG, Log, TEXT("Unhovered Door: %s"), CachedHoveredDoor);
+			}
 		}
 		CachedHoveredDoor = HoveredDoor;
 	}
