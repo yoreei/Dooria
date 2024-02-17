@@ -56,28 +56,11 @@ void AUE5TopDownARPGPlayerController::SetupInputComponent()
 	{
 		// Setup mouse input events
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &AUE5TopDownARPGPlayerController::OnSetDestinationTriggered);
-		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::OnInputStarted);
-		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &AUE5TopDownARPGPlayerController::OnSetDestinationReleased);
-		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &AUE5TopDownARPGPlayerController::OnSetDestinationReleased);
-
 		EnhancedInputComponent->BindAction(ActivateShowPathsAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateShowPathsAction);
 		EnhancedInputComponent->BindAction(ActivateDestroyWallAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateDestroyWallAction);
 		EnhancedInputComponent->BindAction(ActivateFreeRoamAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateFreeRoamAction);
-
-		// Setup touch input events
-		// TODO clean?
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::OnInputStarted);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &AUE5TopDownARPGPlayerController::OnTouchTriggered);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &AUE5TopDownARPGPlayerController::OnTouchReleased);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &AUE5TopDownARPGPlayerController::OnTouchReleased);
 	}
 }
-
-// TODO clean?
-//void AUE5TopDownARPGPlayerController::OnInputStarted()
-//{
-//	StopMovement();
-//}
 
 // Triggered every frame when the input is held down
 void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
@@ -90,72 +73,7 @@ void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 		UE_LOGFMT(LogUE5TopDownARPG, Log, "SetDestination Door: {0}", *CachedHoveredDoor->GetActorNameOrLabel());
 		EPathFollowingRequestResult::Type Result = AIController->MoveToActor(CachedHoveredDoor, 100.f, false, /*bUsePathFinding*/ true, false, NULL, /* bAllowPartialPaths */ true);
 	}
-	
-	//TArray<AActor*> FoundActors;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADoorTrigger::StaticClass(), FoundActors);
-	//if (FoundActors.Num() >= 1)
-	//{
-	//	ADoorTrigger* DoorTrigger = Cast<ADoorTrigger>(FoundActors[0]);
-	//	if (IsValid(DoorTrigger))
-	//	{
-	//		//UAIBlueprintHelperLibrary::SimpleMoveToActor(this, CachedHoveredDoor);
-	//		//UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedHoveredDoor->GetActorLocation());
-	//		// 
-	//		//FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-	//		//ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
-	//	}
-	//}
 }
-
-// TODO clean?
-//void AUE5TopDownARPGPlayerController::OnSetDestinationReleased()
-//{
-//	// If it was a short press
-//	if (FollowTime <= ShortPressThreshold)
-//	{
-//		// We move there and spawn some particles
-//		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-//		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-//	}
-//
-//	FollowTime = 0.f;
-//}
-
-// TODO clean?
-//void AUE5TopDownARPGPlayerController::OnTouchTriggered()
-//{
-//	bIsTouch = true;
-//	OnSetDestinationTriggered();
-//}
-//
-//void AUE5TopDownARPGPlayerController::OnTouchReleased()
-//{
-//	bIsTouch = false;
-//	OnSetDestinationReleased();
-//}
-
-
-	// TODO move to other function
-	//AUE5TopDownARPGCharacter* ARPGCharacter = Cast<AUE5TopDownARPGCharacter>(GetPawn());
-	//if (IsValid(ARPGCharacter))
-	//{
-	//	FHitResult Hit;
-	//	bool bHitSuccessful = false;
-	//	if (bIsTouch)
-	//	{
-	//		bHitSuccessful = GetHitResultUnderFinger(ETouchIndex::Touch1, ECollisionChannel::ECC_Visibility, true, Hit);
-	//	}
-	//	else
-	//	{
-	//		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
-	//	}
-
-	//	// If we hit a surface, cache the location
-	//	if (bHitSuccessful)
-	//	{
-	//		ARPGCharacter->ActivateAbility(Hit.Location);
-	//	}
-	//}
 
 void AUE5TopDownARPGPlayerController::onActivateShowPathsAction()
 {
@@ -189,11 +107,6 @@ void AUE5TopDownARPGPlayerController::Tick(float DeltaTime)
 		AActor* Actor = HitResult.GetActor();
 
 		ADoorTrigger* HoveredDoor = Cast<ADoorTrigger>(Actor);
-
-		//if (Actor)
-		//{
-		//	//UE_LOGFMT(LogUE5TopDownARPG, Log, "Hovered Actor: {0} of type {1} is door: {2}", *Actor->GetActorNameOrLabel(), *Actor->GetClass()->GetName(), IsValid(HoveredDoor));
-		//}
 
 		if (HoveredDoor != CachedHoveredDoor && IsValid(HoveredDoor))
 		{

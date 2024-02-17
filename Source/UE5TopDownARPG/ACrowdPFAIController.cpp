@@ -61,11 +61,14 @@ void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequ
 
     UWorld* pWorld = GetWorld();
     ensure(pWorld);
-    const TArray<FNavPathPoint>& PathPoints = OutPath->GetPathPoints();
-    for (const FNavPathPoint& Point : PathPoints)
+    if (ensure(OutPath))
     {
-        Chaos::TVector<double, 3> Loc = Point.Location;
-        FVector loc2 = Point.Location;
-        DrawDebugBox(pWorld, loc2, {20.f, 20.f, 20.f}, FColor::Black, true, -1.f, 0, 5.f);
+        const TArray<FNavPathPoint>& PathPoints = OutPath->GetPathPoints();
+        for (const FNavPathPoint& Point : PathPoints)
+        {
+            Chaos::TVector<double, 3> Loc = Point.Location;
+            FVector loc2 = Point.Location;
+            DrawDebugBox(pWorld, loc2, {20.f, 20.f, 20.f}, FColor::Black, true, -1.f, 0, 5.f);
+        }
     }
 }
