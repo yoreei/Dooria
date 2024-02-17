@@ -66,7 +66,7 @@ private:
 	FCrowdPFOptions O;
 
 	bool IsWall(const FIntVector2& Cell) const;
-
+	float toUU(int Val, bool isX = true);
 	void BresenhamsRay2D(const FIntVector2& Goal, FIntVector2 Origin, OUT std::deque<FIntVector2>& LOS);
 	void GetLos(const FIntVector2& Cell, const FIntVector2& Goal, std::deque<FIntVector2>& Los);
 	void VisitCell(std::deque<FIntVector2>& WaveFront, const FIntVector2& Cell, float CurrentCost, const FIntVector2& Goal, OUT std::deque<FIntVector2>& SecondWaveFront, bool bLosPass);
@@ -101,6 +101,6 @@ private:
 	FIntVector2 ToFIntVector2(FVector Vect);
 	int ToLinearIdx(FIntVector2 IntVector2);
 	FVector2D ToVector2D(const FIntVector2& IntVector2);
-	bool IsValidIdx(int Idx);
+	bool IsValidIdx(int Idx) const;
 	FVector addZ(FVector2D Vect, float Z);
 };

@@ -58,10 +58,9 @@ FCrowdPFModule& FCrowdPFModule::operator=(FCrowdPFModule&&) = default;
 void FCrowdPFModule::DoFlowTiles(const FVector& WorldOrigin, const FVector& WorldGoal, OUT FNavPathSharedPtr& OutPath) { ModuleImplementation->DoFlowTiles(WorldOrigin, WorldGoal, OutPath); }
 void FCrowdPFModule::Init(UWorld* _World, FCrowdPFOptions Options) { ModuleImplementation->Init(_World, Options); } // TODO better handling of World?
 
-float FCrowdPFModule::Impl::toUU(int Val, bool isX = true)
+float FCrowdPFModule::Impl::toUU(int Val, bool isX)
 {
 	return (Val * O.CellSize) + (isX ? O.OffsetX : O.OffsetY);
-
 }
 
 bool FCrowdPFModule::Impl::IsWall(const FIntVector2& Cell) const
@@ -621,7 +620,7 @@ FVector2D FCrowdPFModule::Impl::ToVector2D(const FIntVector2& IntVector2)
 	return Result;
 };
 
-bool FCrowdPFModule::Impl::IsValidIdx(int Idx)
+bool FCrowdPFModule::Impl::IsValidIdx(int Idx) const
 {
 	return Idx >= 0 && Idx <  O.Cols * O.Rows;
 }
