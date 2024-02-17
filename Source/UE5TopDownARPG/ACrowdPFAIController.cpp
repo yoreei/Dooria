@@ -36,7 +36,7 @@ void ACrowdPFAIController::BeginPlay()
 
 void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
 {
-    UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
+    //UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
     DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_FindPathForMoveRequest"), STAT_CrowdPF_FindPathForMoveRequest, STATGROUP_CrowdPF);
 
     AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());

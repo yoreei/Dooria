@@ -68,6 +68,9 @@ public:
 	void StartPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
+	bool CanMoveAnywhere = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	TSubclassOf<AActor> WallClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
