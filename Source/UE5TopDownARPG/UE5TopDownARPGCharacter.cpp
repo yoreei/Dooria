@@ -174,5 +174,6 @@ void AUE5TopDownARPGCharacter::Death()
 	{
 		PlayerController->OnPlayerDied();
 	}
-	Destroy();
+	isDead = true;
+	//Destroy();
 }

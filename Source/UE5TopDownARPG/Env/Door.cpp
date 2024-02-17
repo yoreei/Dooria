@@ -3,6 +3,7 @@
 
 #include "Door.h"
 #include "../UE5TopDownARPG.h"
+#include "../UE5TopDownARPGGameMode.h"
 //#include "../UE5TopDownARPGGameMode.h"
 
 void ADoorTrigger::CustomClick_Implementation()
@@ -13,12 +14,12 @@ void ADoorTrigger::CustomClick_Implementation()
 
 void ADoorTrigger::ActionStart(AActor* ActorInRange)
 {
-  //AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
-  //if (IsValid(GameMode))
-  //{
-  //  GameMode->EndGame(true);
-  //}
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You Entered Door..."));
+	AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
+	if (IsValid(GameMode))
+	{
+		GameMode->AdvanceLevel();
+	}
 }
 
 void ADoorTrigger::CustomHover_Implementation()

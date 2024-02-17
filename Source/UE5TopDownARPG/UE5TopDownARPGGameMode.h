@@ -19,6 +19,8 @@ public:
 
 	// GamePlay Methods 
 
+	void SetupDooria();
+
 	void EndGame(bool IsWin);
 
 	// Generate Methods
@@ -112,6 +114,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
 	FCrowdPFOptions Options;
 
+
+
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;
 
@@ -136,8 +140,16 @@ public:
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> EdgeDecoClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	int32 MustOpenDoorsToWin = 3;
+	// Levels
+
+	UFUNCTION(BlueprintCallable, Category = "Dooria|Levels")
+	void AdvanceLevel();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|Levels")
+	int32 ReachLevelToWin = 4;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dooria|Levels")
+	int32 CurrentLevel = 1;
 
 	TArray<TArray<MazeCell>> Maze;
 };

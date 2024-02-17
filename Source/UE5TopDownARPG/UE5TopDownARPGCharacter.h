@@ -35,6 +35,9 @@ public:
 
 	bool ActivateAbility(FVector Location);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
+	bool isDead = false;
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
