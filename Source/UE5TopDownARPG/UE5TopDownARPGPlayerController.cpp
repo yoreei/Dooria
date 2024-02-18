@@ -16,6 +16,7 @@
 #include "ACrowdPFAIController.h"
 #include "UE5TopDownARPGGameMode.h"
 #include "UE5TopDownARPG.h"
+#include "DooriaGameInstance.h"
 #include <Kismet/GameplayStatics.h>
 
 AUE5TopDownARPGPlayerController::AUE5TopDownARPGPlayerController()
@@ -60,6 +61,7 @@ void AUE5TopDownARPGPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(ActivateShowPathsAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateShowPathsAction);
 		EnhancedInputComponent->BindAction(ActivateDestroyWallAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateDestroyWallAction);
 		EnhancedInputComponent->BindAction(ActivateFreeRoamAction, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateFreeRoamAction);
+		EnhancedInputComponent->BindAction(ActivateCheat, ETriggerEvent::Started, this, &AUE5TopDownARPGPlayerController::onActivateCheat);
 	}
 }
 
@@ -119,6 +121,16 @@ void AUE5TopDownARPGPlayerController::onActivateDestroyWallAction()
 	FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("onActivateDestroyWallAction"));
 	//CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
+}
+
+void AUE5TopDownARPGPlayerController::onActivateCheat()
+{
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Activated Cheat"));
+	UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+	if (DooriaGameInstance)
+	{
+		DooriaGameInstance->AdvanceLevel();
+	}
 }
 
 void AUE5TopDownARPGPlayerController::onActivateFreeRoamAction()

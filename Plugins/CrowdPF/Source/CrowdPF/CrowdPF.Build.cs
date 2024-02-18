@@ -40,7 +40,7 @@ public class CrowdPF : ModuleRules
 				"SlateCore",
                 "NavigationSystem",
                 "AIModule",
-                "UnrealEd"
+                //"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
