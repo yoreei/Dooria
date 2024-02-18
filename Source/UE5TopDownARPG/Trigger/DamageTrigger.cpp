@@ -19,7 +19,7 @@ void ADamageTrigger::ActionEnd(AActor* ActorInRange)
 
 void ADamageTrigger::DamageTick()
 {
-  if (IsValid(Target))
+  if (IsValid(Target) && CanDealDamage)
   {
     Target->TakeDamage(Damage, FDamageEvent(UDamageType::StaticClass()), nullptr, this);
   }

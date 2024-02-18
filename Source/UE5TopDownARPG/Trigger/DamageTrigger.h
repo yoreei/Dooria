@@ -31,4 +31,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float DamageTickRate = 1.0f;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
+	bool CanDealDamage = true;
 };
