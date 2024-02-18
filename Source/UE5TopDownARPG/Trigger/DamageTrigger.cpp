@@ -22,6 +22,7 @@ void ADamageTrigger::DamageTick()
   if (IsValid(Target) && CanDealDamage)
   {
     Target->TakeDamage(Damage, FDamageEvent(UDamageType::StaticClass()), nullptr, this);
+    CanDealDamage = false;
   }
 }
 

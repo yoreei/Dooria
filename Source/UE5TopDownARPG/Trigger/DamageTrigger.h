@@ -16,7 +16,7 @@ class UE5TOPDOWNARPG_API ADamageTrigger : public ABaseTrigger
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
-	bool CanDealDamage = true;
+	bool CanDealDamage = false;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Dooria")
 	void TrapTrigger();
