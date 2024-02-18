@@ -21,14 +21,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dooria")
 	void EndGame(bool IsWin);
 
+	UFUNCTION(BlueprintCallable, Category = "Dooria")
+	int GetLevelRows();
+
+	UFUNCTION(BlueprintCallable, Category = "Dooria")
+	int GetLevelCols();
+
+	UFUNCTION(BlueprintCallable, Category = "Dooria")
+	float GetTrapSpawnFactor();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float BaseTrapSpawnFactor = 0.8f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float IncTrapSpawnFactor = 0.2f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria|MazeGen")
-	float CurrentTrapSpawnFactor = BaseTrapSpawnFactor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|Levels")
 	int32 ReachLevelToWin = 4;
@@ -59,12 +65,6 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	int32 IncLevelCols = 2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
-	int32 CurrentLevelRows = BaseLevelRows;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
-	int32 CurrentLevelCols = BaseLevelCols;
 
 protected:
 	virtual void Init() override;

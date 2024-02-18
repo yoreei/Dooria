@@ -2,12 +2,25 @@
 
 
 #include "Door.h"
+#include "Components/BoxComponent.h"
 #include "../DooriaGameInstance.h"
 #include "../UE5TopDownARPG.h"
 #include "../UE5TopDownARPGGameMode.h"
 //#include "../UE5TopDownARPGGameMode.h"
 
 void ADoorTrigger::CustomClick_Implementation()
+{
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You should override this function, Nil!"));
+	ensure(false);
+}
+
+void ADoorTrigger::CustomHover_Implementation()
+{
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You should override this function, Nil!"));
+	ensure(false);
+}
+
+void ADoorTrigger::CustomUnhover_Implementation()
 {
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You should override this function, Nil!"));
 	ensure(false);
@@ -23,14 +36,29 @@ void ADoorTrigger::ActionStart(AActor* ActorInRange)
 	}
 }
 
-void ADoorTrigger::CustomHover_Implementation()
+void ADoorTrigger::BeginPlay()
 {
-	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You should override this function, Nil!"));
-	ensure(false);
+	UObject* Obj = GetDefaultSubobjectByName(TEXT("Door_Collider"));
+	UBoxComponent* Box = Cast< UBoxComponent>(Obj);
+	if (IsValid(Box))
+	{
+		UE_LOG(LogUE5TopDownARPG, Log, TEXT("we have box"));
+		Box->OnComponentBeginOverlap.AddDynamic(this, &ADoorTrigger::OnOverlapBegin);
+		Box->OnComponentEndOverlap.AddDynamic(this, &ADoorTrigger::OnOverlapEnd);
+	}
+	else {
+		ensureAlwaysMsgf(false, TEXT("no box"));
+	}
 }
 
-void ADoorTrigger::CustomUnhover_Implementation()
+void ADoorTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You should override this function, Nil!"));
-	ensure(false);
+	// Handle overlap begin event
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Overlap began with %s"), *OtherActor->GetName());
+}
+
+void ADoorTrigger::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// Handle overlap end event
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Overlap ended with %s"), *OtherActor->GetName());
 }
