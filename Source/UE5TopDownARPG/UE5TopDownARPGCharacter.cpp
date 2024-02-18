@@ -182,6 +182,11 @@ void AUE5TopDownARPGCharacter::Death()
 		PlayerController->OnPlayerDied();
 	}
 
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->DisableMovement();
+	}
+
 	isDead = true;
 	//Destroy();
 }
