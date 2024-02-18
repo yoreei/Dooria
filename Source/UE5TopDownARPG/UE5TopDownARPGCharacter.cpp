@@ -18,6 +18,7 @@
 #include "UE5TopDownARPG.h"
 #include "UI/HealthbarWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 #include "DooriaGameInstance.h"
 
 AUE5TopDownARPGCharacter::AUE5TopDownARPGCharacter()
@@ -172,11 +173,15 @@ void AUE5TopDownARPGCharacter::Death()
 	}
 
 	GetWorld()->GetTimerManager().ClearTimer(DeathHandle);
-	AUE5TopDownARPGPlayerController* PlayerController = Cast<AUE5TopDownARPGPlayerController>(GetController());
+
+
+	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AUE5TopDownARPGPlayerController::StaticClass());
+	AUE5TopDownARPGPlayerController* PlayerController = Cast<AUE5TopDownARPGPlayerController>(FoundActor);
 	if (IsValid(PlayerController))
 	{
 		PlayerController->OnPlayerDied();
 	}
+
 	isDead = true;
 	//Destroy();
 }

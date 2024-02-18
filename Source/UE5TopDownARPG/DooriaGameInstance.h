@@ -18,6 +18,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dooria|Levels")
 	void AdvanceLevel();
 
+	UFUNCTION(BlueprintCallable, Category = "Dooria|Levels")
+	void RestartGame();
+
 	UFUNCTION(BlueprintCallable, Category = "Dooria")
 	void EndGame(bool IsWin);
 
