@@ -13,6 +13,10 @@ UCLASS()
 class UE5TOPDOWNARPG_API ADamageTrigger : public ABaseTrigger
 {
 	GENERATED_BODY()
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
+	bool CanDealDamage = true;
 
 protected:
 	virtual void ActionStart(AActor* ActorInRange) override;
@@ -30,7 +34,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	float DamageTickRate = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
-	bool CanDealDamage = true;
 };
