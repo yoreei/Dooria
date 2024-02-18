@@ -59,6 +59,11 @@ void ADoorTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	if (IsValid(Character))
 	{
 		UE_LOG(LogUE5TopDownARPG, Log, TEXT("Go to next level"), *OtherActor->GetName());
+		UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+		if (DooriaGameInstance)
+		{
+			DooriaGameInstance->AdvanceLevel();
+		}
 	}
 }
 
