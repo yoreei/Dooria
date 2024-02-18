@@ -10,6 +10,7 @@
 #include "Maze.h"
 #include "Trigger/FloorTrapTrigger.h"
 #include "CrowdPF/Public/CrowdPF.h"
+#include "DooriaGameInstance.h"
 
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
@@ -185,7 +186,14 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
                     Maze[row][col - 1].Type == CellType::Path && Maze[row][col + 1].Type == CellType::Path
                     );
             }, PotentialTraps);
-        int NumTraps = ((Maze.Num() + Maze[0].Num())) * TrapSpawnFactor;
+
+        UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+        if (!IsValid(DooriaGameInstance))
+        {
+            ensureMsgf(false, TEXT("DooriaGameInstance is not valid."));
+            return;
+        }
+        int NumTraps = floor(((Maze.Num() + Maze[0].Num())) * DooriaGameInstance->CurrentTrapSpawnFactor);
         TArray<FCell> Traps;
         GetRandom(NumTraps, PotentialTraps, Traps);
 
@@ -297,18 +305,6 @@ AUE5TopDownARPGGameMode::AUE5TopDownARPGGameMode()
 	}
 }
 
-void AUE5TopDownARPGGameMode::EndGame(bool IsWin)
-{
-	if (IsWin)
-	{
-		UE_LOG(LogUE5TopDownARPG, Log, TEXT("Win"));
-	}
-	else
-	{
-		UE_LOG(LogUE5TopDownARPG, Log, TEXT("Lose"));
-	}
-}
-
 ADooriaCell* AUE5TopDownARPGGameMode::SpawnCellAtGridLoc(int i, int j, TSubclassOf<AActor> SpawnClass)
 {
     AActor* Actor = BasicSpawn(i, j, SpawnClass);
@@ -375,33 +371,33 @@ void AUE5TopDownARPGGameMode::SpawnMaze()
 	}
 }
 
-void AUE5TopDownARPGGameMode::SpawnCamera()
-{
-    // Spawn the camera actor
-    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-    if (PlayerController)
-    {
-        float MaxX = Maze[0].Num() * CellSize;
-        float MaxY = Maze.Num() * CellSize;
-        float CamX = MaxX / 2;
-        float CamY = 0;
-        float CamZ = FMath::Max(MaxX, MaxY) * CameraZFactor;
-
-        FVector Location = { CamY, CamX, CamZ };
-        FActorSpawnParameters SpawnParams;
-        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, CameraRotator, SpawnParams);
-
-        if (CameraActor)
-        {
-            PlayerController->SetViewTarget(CameraActor);
-        }
-        else
-        {
-            // If not spawning, find your camera actor in the level and set it as the view target
-            // Example: Find your camera actor by tag or name
-        }
-    }
-}
+//void AUE5TopDownARPGGameMode::SpawnCamera()
+//{
+//    // Spawn the camera actor
+//    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+//    if (PlayerController)
+//    {
+//        float MaxX = Maze[0].Num() * CellSize;
+//        float MaxY = Maze.Num() * CellSize;
+//        float CamX = MaxX / 2;
+//        float CamY = 0;
+//        float CamZ = FMath::Max(MaxX, MaxY) * CameraZFactor;
+//
+//        FVector Location = { CamY, CamX, CamZ };
+//        FActorSpawnParameters SpawnParams;
+//        AActor* CameraActor = GetWorld()->SpawnActor<AActor>(CameraClass, Location, CameraRotator, SpawnParams);
+//
+//        if (CameraActor)
+//        {
+//            PlayerController->SetViewTarget(CameraActor);
+//        }
+//        else
+//        {
+//            // If not spawning, find your camera actor in the level and set it as the view target
+//            // Example: Find your camera actor by tag or name
+//        }
+//    }
+//}
 
 int32 AUE5TopDownARPGGameMode::CalculateWallTileType(int i, int j)
 {
@@ -531,7 +527,7 @@ void AUE5TopDownARPGGameMode::SetupDooria()
     SpawnMaze();
     GenerateLightSources();
     PrintMaze("After GenerateLightSources");
-    SpawnCamera();
+    //SpawnCamera();
 
     //FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
     //if (CrowdPFModule)
@@ -541,14 +537,4 @@ void AUE5TopDownARPGGameMode::SetupDooria()
     //    Options.Cols = cols;
     //    CrowdPFModule->Init(pWorld, Options);
     //}
-}
-
-void AUE5TopDownARPGGameMode::AdvanceLevel()
-{
-    CurrentLevel++;
-    if (CurrentLevel == ReachLevelToWin)
-    {
-        EndGame(true);
-    }
-    SetupDooria();
 }

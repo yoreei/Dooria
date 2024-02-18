@@ -17,6 +17,7 @@
 #include "UE5TopDownARPG.h"
 #include "UI/HealthbarWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "DooriaGameInstance.h"
 
 AUE5TopDownARPGCharacter::AUE5TopDownARPGCharacter()
 {
@@ -152,10 +153,11 @@ void AUE5TopDownARPGCharacter::OnRep_SetHealth(float OldHealth)
 void AUE5TopDownARPGCharacter::Death()
 {
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Death"));
-	AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
-	if (IsValid(GameMode))
+
+	UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+	if (DooriaGameInstance)
 	{
-		GameMode->EndGame(false);
+		DooriaGameInstance->EndGame(false);
 	}
 
 	FActorSpawnParameters SpawnParameters;
