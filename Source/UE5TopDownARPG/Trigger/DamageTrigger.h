@@ -18,6 +18,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
 	bool CanDealDamage = true;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Dooria")
+	void TrapTrigger();
+	virtual void TrapTrigger_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Dooria")
+	void TrapUntrigger();
+	virtual void TrapUntrigger_Implementation();
+
+	UPROPERTY(EditDefaultsOnly)
+	float Damage = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float DamageTickRate = 1.0f;
+
 protected:
 	virtual void ActionStart(AActor* ActorInRange) override;
 	virtual void ActionEnd(AActor* ActorInRange) override;
@@ -28,10 +42,4 @@ protected:
 	AActor* Target;
 
 	FTimerHandle CustomDamageTickTimerHandle;
-
-	UPROPERTY(EditDefaultsOnly)
-	float Damage = 10.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	float DamageTickRate = 1.0f;
 };

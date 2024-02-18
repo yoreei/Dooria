@@ -24,3 +24,11 @@ void ADamageTrigger::DamageTick()
     Target->TakeDamage(Damage, FDamageEvent(UDamageType::StaticClass()), nullptr, this);
   }
 }
+
+void ADamageTrigger::TrapTrigger_Implementation()
+{
+}
+
+void ADamageTrigger::TrapUntrigger_Implementation()
+{
+}
