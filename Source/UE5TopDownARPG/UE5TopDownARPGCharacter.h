@@ -38,6 +38,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Dooria")
 	bool isDead = false;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SetHealth, EditDefaultsOnly)
+	float Health = 100.0f;
+
+	UPROPERTY(Replicated, EditDefaultsOnly)
+	float MaxHealth = 100.0f;
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -61,12 +67,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UBaseAbility> AbilityTemplate;
-
-	UPROPERTY(ReplicatedUsing = OnRep_SetHealth, EditDefaultsOnly)
-	float Health = 100.0f;
-
-	UPROPERTY(Replicated, EditDefaultsOnly)
-	float MaxHealth = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float DeathDelay = 1.0f;

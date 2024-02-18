@@ -9,7 +9,6 @@
 
 void UDooriaGameInstance::EndGame(bool IsWin)
 {
-    CurrentLevel = 1;
     if (IsWin)
     {
         UE_LOG(LogUE5TopDownARPG, Log, TEXT("Win"));

@@ -128,7 +128,7 @@ void AUE5TopDownARPGCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage,
 {
 	Health -= Damage;
 	OnRep_SetHealth(Health + Damage);
-	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Health %f"), Health);
+	// UE_LOG(LogUE5TopDownARPG, Log, TEXT("Health %f"), Health);
 	if (IsValid(HealthbarWidget))
 	{
 		float HealthPercent = Health / MaxHealth;
@@ -148,7 +148,7 @@ void AUE5TopDownARPGCharacter::OnRep_SetHealth(float OldHealth)
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Health %f"), Health));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Health %f"), Health));
 	}
 }
 
