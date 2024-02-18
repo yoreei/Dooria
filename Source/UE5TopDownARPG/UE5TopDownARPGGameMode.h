@@ -106,10 +106,10 @@ public:
 	float CellSize = 128.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	bool UseCrowdPf = true;
+	bool UseCrowdPf = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
-	bool DrawDebugPath = true;
+	bool DrawDebugPath = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
 	FCrowdPFOptions Options;
