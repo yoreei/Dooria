@@ -2,6 +2,7 @@
 
 
 #include "Door.h"
+#include "../DooriaGameInstance.h"
 #include "../UE5TopDownARPG.h"
 #include "../UE5TopDownARPGGameMode.h"
 //#include "../UE5TopDownARPGGameMode.h"
@@ -15,10 +16,10 @@ void ADoorTrigger::CustomClick_Implementation()
 void ADoorTrigger::ActionStart(AActor* ActorInRange)
 {
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You Entered Door..."));
-	AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
-	if (IsValid(GameMode))
+	UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+	if (DooriaGameInstance)
 	{
-		GameMode->AdvanceLevel();
+		DooriaGameInstance->AdvanceLevel();
 	}
 }
 

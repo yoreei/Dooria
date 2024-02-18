@@ -21,8 +21,6 @@ public:
 
 	void SetupDooria();
 
-	void EndGame(bool IsWin);
-
 	// Generate Methods
 
 	void GenerateMaze(int32 rows, int32 cols);
@@ -49,7 +47,7 @@ public:
 
 	void SpawnMaze();
 
-	void SpawnCamera();
+	//void SpawnCamera();
 
 	ADooriaObstruction* SpawnObstructionAtGridLoc(int i, int j);
 
@@ -89,9 +87,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
 	float LoopinessFactor = 1.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
-	float TrapSpawnFactor = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	TSubclassOf<AActor> CameraClass;
@@ -139,17 +134,6 @@ public:
 
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> EdgeDecoClass;
-
-	// Levels
-
-	UFUNCTION(BlueprintCallable, Category = "Dooria|Levels")
-	void AdvanceLevel();
-
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|Levels")
-	int32 ReachLevelToWin = 4;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Dooria|Levels")
-	int32 CurrentLevel = 1;
 
 	TArray<TArray<MazeCell>> Maze;
 };
