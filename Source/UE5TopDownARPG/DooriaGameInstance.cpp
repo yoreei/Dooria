@@ -4,18 +4,22 @@
 #include "CoreMinimal.h"
 #include "DooriaGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "UE5TopDownARPGHUD.h"
 #include "UE5TopDownARPG.h"
 
 
 void UDooriaGameInstance::EndGame(bool IsWin)
 {
-    if (IsWin)
+    AHUD* MyHUD = GetWorld()->GetFirstPlayerController()->GetHUD();
+    AUE5TopDownARPGHUD* HUD = Cast<AUE5TopDownARPGHUD>(MyHUD);
+    if (IsValid(HUD))
     {
-        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Win"));
+        HUD->ShowEndGameScreen(IsWin);
     }
     else
     {
-        UE_LOG(LogUE5TopDownARPG, Log, TEXT("Lose"));
+        ensureMsgf(false, TEXT("No HUD"));
+        return;
     }
 }
 
@@ -43,7 +47,7 @@ float UDooriaGameInstance::GetTrapSpawnFactor()
 void UDooriaGameInstance::AdvanceLevel()
 {
     CurrentLevel++;
-    if (CurrentLevel == ReachLevelToWin)
+    if (CurrentLevel => ReachLevelToWin)
     {
         EndGame(true);
     }

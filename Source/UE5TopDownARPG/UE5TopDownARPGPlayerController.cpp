@@ -29,10 +29,11 @@ AUE5TopDownARPGPlayerController::AUE5TopDownARPGPlayerController()
 
 void AUE5TopDownARPGPlayerController::OnPlayerDied()
 {
-	AUE5TopDownARPGHUD* HUD = Cast<AUE5TopDownARPGHUD>(GetHUD());
-	if (IsValid(HUD))
+	UE_LOG(LogUE5TopDownARPG, Log, TEXT("You Died"));
+	UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+	if (DooriaGameInstance)
 	{
-		HUD->ShowEndGameScreen();
+		DooriaGameInstance->EndGame(false);
 	}
 }
 

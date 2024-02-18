@@ -21,7 +21,7 @@ void AUE5TopDownARPGHUD::BeginPlay()
   }
 }
 
-void AUE5TopDownARPGHUD::ShowEndGameScreen()
+void AUE5TopDownARPGHUD::ShowEndGameScreen(bool isWin)
 {
   if (IsValid(EndGameWidget))
   {
