@@ -1,0 +1,12 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.CrowdPF.cpp.obj": [
+			"ACrowdPFAIControllerSample.gen.cpp.obj",
+			"CrowdPF.gen.cpp.obj",
+			"CrowdPF.init.gen.cpp.obj",
+			"CrowdPFImpl.cpp.obj",
+			"ACrowdPFAIControllerSample.cpp.obj"
+		]
+	}
+}

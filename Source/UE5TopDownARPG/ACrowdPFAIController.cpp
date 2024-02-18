@@ -4,7 +4,7 @@
 #include "NavigationData.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
-#include "CrowdPF/Public/CrowdPF.h"
+//#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGGameMode.h"
 #include "UE5TopDownARPG.h"
 #include "Env/Door.h"
@@ -37,7 +37,7 @@ void ACrowdPFAIController::BeginPlay()
 void ACrowdPFAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
 {
     //UE_LOGFMT(LogUE5TopDownARPG, Log, "ACrowdPFAIController received MoveRequest for Door: {0}", *MoveRequest.GetGoalActor()->GetActorNameOrLabel());
-    DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_FindPathForMoveRequest"), STAT_CrowdPF_FindPathForMoveRequest, STATGROUP_CrowdPF);
+    //DECLARE_SCOPE_CYCLE_COUNTER(TEXT("STAT_CrowdPF_FindPathForMoveRequest"), STAT_CrowdPF_FindPathForMoveRequest, STATGROUP_CrowdPF);
 
     AUE5TopDownARPGGameMode* GameMode = Cast<AUE5TopDownARPGGameMode>(GetWorld()->GetAuthGameMode());
     if (!ensure(GameMode)) { return; }

@@ -12,7 +12,7 @@
 #include "EnhancedInputComponent.h"
 #include "Logging/StructuredLog.h"
 #include "EnhancedInputSubsystems.h"
-#include "CrowdPF/Public/CrowdPF.h"
+//#include "CrowdPF/Public/CrowdPF.h"
 #include "ACrowdPFAIController.h"
 #include "UE5TopDownARPGGameMode.h"
 #include "UE5TopDownARPG.h"
@@ -111,14 +111,14 @@ void AUE5TopDownARPGPlayerController::OnSetDestinationTriggered()
 
 void AUE5TopDownARPGPlayerController::onActivateShowPathsAction()
 {
-	FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
+	//FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("onActivateShowPathsAction"));
 	//CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
 }
 
 void AUE5TopDownARPGPlayerController::onActivateDestroyWallAction()
 {
-	FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
+	//FCrowdPFModule* CrowdPFModule = FModuleManager::LoadModulePtr<FCrowdPFModule>("CrowdPF");
 	UE_LOG(LogUE5TopDownARPG, Log, TEXT("onActivateDestroyWallAction"));
 	//CrowdPFModule->DoFlowTiles(GetPawn()->GetActorLocation(), MoveRequest.GetGoalActor()->GetActorLocation(), OutPath);
 }

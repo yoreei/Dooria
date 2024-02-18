@@ -8,7 +8,7 @@
 #include "InputActionValue.h"
 #include "Materials/MaterialInterface.h"
 #include "Env/Door.h"
-#include "CrowdPF/Public/CrowdPF.h"
+//#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGPlayerController.generated.h"
 
 /** Forward declaration to improve compiling times */

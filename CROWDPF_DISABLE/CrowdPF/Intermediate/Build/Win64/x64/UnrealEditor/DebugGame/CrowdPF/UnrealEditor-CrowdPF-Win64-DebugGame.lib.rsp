@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-CrowdPF-Win64-DebugGame.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\oddne\DooriaCPP\Intermediate\Build\Win64\x64\UE5TopDownARPGEditor\DebugGame\UnrealEd\SharedPCH.UnrealEd.NonOptimized.Cpp17.InclOrderUnreal5_1.h.obj"
+"C:\Users\oddne\DooriaCPP\Plugins\CrowdPF\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\CrowdPF\Module.CrowdPF.cpp.obj"
+"C:\Users\oddne\DooriaCPP\Plugins\CrowdPF\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\CrowdPF\Default.rc2.res"
+/OUT:"C:\Users\oddne\DooriaCPP\Plugins\CrowdPF\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\CrowdPF\UnrealEditor-CrowdPF-Win64-DebugGame.lib"

@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Env/Cell.h"
 #include "Maze.h"
-#include "CrowdPF/Public/CrowdPF.h"
+//#include "CrowdPF/Public/CrowdPF.h"
 #include "UE5TopDownARPGGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -106,8 +106,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	bool DrawDebugPath = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
-	FCrowdPFOptions Options;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
+	//FCrowdPFOptions Options;
 
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;
