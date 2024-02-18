@@ -193,7 +193,10 @@ void AUE5TopDownARPGGameMode::GenerateMaze(int32 rows, int32 cols) {
             ensureMsgf(false, TEXT("DooriaGameInstance is not valid."));
             return;
         }
-        int NumTraps = floor(((Maze.Num() + Maze[0].Num())) * DooriaGameInstance->CurrentTrapSpawnFactor);
+
+        float fact = DooriaGameInstance->GetTrapSpawnFactor();
+        float basetraps = (Maze.Num() + Maze[0].Num());
+        int NumTraps = floor(basetraps * fact);
         TArray<FCell> Traps;
         GetRandom(NumTraps, PotentialTraps, Traps);
 
@@ -523,8 +526,8 @@ void AUE5TopDownARPGGameMode::SetupDooria()
 
     UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
     if (IsValid(DooriaGameInstance)){
-        rows = DooriaGameInstance->CurrentLevelRows;
-        cols = DooriaGameInstance->CurrentLevelCols;
+        rows = DooriaGameInstance->GetLevelRows();
+        cols = DooriaGameInstance->GetLevelCols();
     }
     else {
         ensureMsgf(false, TEXT("DooriaGameInstance is not valid."));
