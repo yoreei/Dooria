@@ -16,8 +16,9 @@ class UE5TOPDOWNARPG_API AUE5TopDownARPGHUD : public AHUD
 
 public:
 	virtual void BeginPlay() override;
-	void ShowEndGameScreen(bool isWin);
+	void ShowEndGameScreen(bool _IsWin);
 
+	bool IsWin;
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> EndGameWidgetClass;

@@ -21,10 +21,11 @@ void AUE5TopDownARPGHUD::BeginPlay()
   }
 }
 
-void AUE5TopDownARPGHUD::ShowEndGameScreen(bool isWin)
+void AUE5TopDownARPGHUD::ShowEndGameScreen(bool _IsWin)
 {
   if (IsValid(EndGameWidget))
   {
+      EndGameWidget->IsWin = _IsWin;
     EndGameWidget->SetVisibility(ESlateVisibility::Visible);
   }
 }

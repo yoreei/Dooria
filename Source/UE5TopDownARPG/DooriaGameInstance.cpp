@@ -50,6 +50,7 @@ void UDooriaGameInstance::AdvanceLevel()
     if (CurrentLevel >= ReachLevelToWin)
     {
         EndGame(true);
+        return;
     }
     
     UWorld* World = GetWorld();
