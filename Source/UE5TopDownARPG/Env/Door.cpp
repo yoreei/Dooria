@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "../DooriaGameInstance.h"
 #include "../UE5TopDownARPG.h"
+#include "../UE5TopDownARPGCharacter.h"
 #include "../UE5TopDownARPGGameMode.h"
 //#include "../UE5TopDownARPGGameMode.h"
 
@@ -54,11 +55,15 @@ void ADoorTrigger::BeginPlay()
 void ADoorTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Handle overlap begin event
-	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Overlap began with %s"), *OtherActor->GetName());
+	AUE5TopDownARPGCharacter* Character = Cast<AUE5TopDownARPGCharacter>(OtherActor);
+	if (IsValid(Character))
+	{
+		UE_LOG(LogUE5TopDownARPG, Log, TEXT("Go to next level"), *OtherActor->GetName());
+	}
 }
 
 void ADoorTrigger::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	// Handle overlap end event
-	UE_LOG(LogUE5TopDownARPG, Log, TEXT("Overlap ended with %s"), *OtherActor->GetName());
+	//UE_LOG(LogUE5TopDownARPG, Log, TEXT("Overlap ended with %s"), *OtherActor->GetName());
 }

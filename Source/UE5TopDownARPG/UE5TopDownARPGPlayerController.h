@@ -53,6 +53,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ActivateFreeRoamAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dooria", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ActivateCheat;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria")
 	UMaterialInterface* OutlineMaterial;
 
@@ -77,6 +80,7 @@ protected:
 	void onActivateFreeRoamAction();
 	void onActivateShowPathsAction();
 	void onActivateDestroyWallAction();
+	void onActivateCheat();
 
 	bool CanFreeRoam = false;
 
