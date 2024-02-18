@@ -211,10 +211,10 @@ void AUE5TopDownARPGGameMode::GenerateLightSources() {
     // Bottom Data Takes Precedence
     TArray<TTuple<int32, int32, FString>> LightSourcePlaces = {
         /* Must be Path:     |    Must be Wall       | Light Source Placement */
-        {N | S | E,        /*|*/ W | DIAG,         /*|*/ "W" }, // T - Cross
-        {N | S | W,        /*|*/ E | DIAG,         /*|*/ "E" },
-        {W | E | N,        /*|*/ S | DIAG,         /*|*/ "S" },
-        {W | E | S,        /*|*/ N | DIAG,         /*|*/ "N" },
+        //{N | S | E,        /*|*/ W | DIAG,         /*|*/ "W" }, // T - Cross
+        //{N | S | W,        /*|*/ E | DIAG,         /*|*/ "E" },
+        //{W | E | N,        /*|*/ S | DIAG,         /*|*/ "S" },
+        //{W | E | S,        /*|*/ N | DIAG,         /*|*/ "N" },
         {NW | NE | E | W,  /*|*/ N,                /*|*/ "N" }, // Outer Corners
         {SW | SE | E | W,  /*|*/ S,                /*|*/ "S" },
         {NW | SW | N | S,  /*|*/ W,                /*|*/ "W" },
