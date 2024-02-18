@@ -18,7 +18,7 @@ public:
 	AUE5TopDownARPGGameMode();
 
 	// GamePlay Methods 
-
+	UFUNCTION(BlueprintCallable, Category = "Dooria|Levels")
 	void SetupDooria();
 
 	// Generate Methods

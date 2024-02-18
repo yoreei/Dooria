@@ -20,6 +20,12 @@ void UDooriaGameInstance::EndGame(bool IsWin)
     }
 }
 
+void UDooriaGameInstance::RestartGame()
+{
+    CurrentLevel = 0;
+    AdvanceLevel();
+}
+
 int UDooriaGameInstance::GetLevelRows()
 {
     return BaseLevelRows + (CurrentLevel - 1) * IncLevelRows;
