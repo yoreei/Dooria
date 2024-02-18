@@ -47,7 +47,7 @@ float UDooriaGameInstance::GetTrapSpawnFactor()
 void UDooriaGameInstance::AdvanceLevel()
 {
     CurrentLevel++;
-    if (CurrentLevel => ReachLevelToWin)
+    if (CurrentLevel >= ReachLevelToWin)
     {
         EndGame(true);
     }
