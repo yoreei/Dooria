@@ -518,8 +518,18 @@ void AUE5TopDownARPGGameMode::SetupDooria()
     UWorld* pWorld = GetWorld();
     ensure(pWorld);
 
-    int32 rows = 21; // Must be odd
-    int32 cols = 21; // Must be odd
+    int rows = 0;
+    int cols = 0;
+
+    UDooriaGameInstance* DooriaGameInstance = Cast<UDooriaGameInstance>(GetWorld()->GetGameInstance());
+    if (IsValid(DooriaGameInstance)){
+        rows = DooriaGameInstance->CurrentLevelRows;
+        cols = DooriaGameInstance->CurrentLevelCols;
+    }
+    else {
+        ensureMsgf(false, TEXT("DooriaGameInstance is not valid."));
+        return;
+    }
 
     InitializeMaze(rows, cols);
     PrintMaze("After InitializeMaze:");

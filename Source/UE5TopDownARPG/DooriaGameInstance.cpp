@@ -9,6 +9,10 @@
 
 void UDooriaGameInstance::EndGame(bool IsWin)
 {
+    CurrentLevel = 1;
+    CurrentTrapSpawnFactor = BaseTrapSpawnFactor;
+    CurrentLevelRows = BaseLevelRows;
+    CurrentLevelCols = BaseLevelCols;
     if (IsWin)
     {
         UE_LOG(LogUE5TopDownARPG, Log, TEXT("Win"));
@@ -23,6 +27,8 @@ void UDooriaGameInstance::AdvanceLevel()
 {
     CurrentLevel++;
     CurrentTrapSpawnFactor += IncTrapSpawnFactor;
+    CurrentLevelRows += IncLevelRows;
+    CurrentLevelCols += IncLevelCols;
     if (CurrentLevel == ReachLevelToWin)
     {
         EndGame(true);
@@ -33,5 +39,25 @@ void UDooriaGameInstance::AdvanceLevel()
     {
         FName CurrentLevelName = *GetWorld()->GetName();
         UGameplayStatics::OpenLevel(this, CurrentLevelName, true);
+    }
+}
+
+void UDooriaGameInstance::Init()
+{
+    if (BaseLevelCols % 2 != 1)
+    {
+        ensureAlwaysMsgf(false, TEXT("Must be odd!"));
+    }
+    if (BaseLevelRows % 2 != 1)
+    {
+        ensureAlwaysMsgf(false, TEXT("Must be odd!"));
+    }
+    if (IncLevelCols % 2 != 0)
+    {
+        ensureAlwaysMsgf(false, TEXT("Must be even!"));
+    }
+    if (IncLevelRows % 2 != 0)
+    {
+        ensureAlwaysMsgf(false, TEXT("Must be even!"));
     }
 }
