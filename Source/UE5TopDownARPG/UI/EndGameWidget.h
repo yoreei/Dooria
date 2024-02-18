@@ -13,5 +13,7 @@ UCLASS()
 class UE5TOPDOWNARPG_API UEndGameWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dooria|MazeGen")
+	bool IsWin = false;
 };
