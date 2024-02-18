@@ -109,8 +109,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoreei's Crowd Pathfinder")
 	FCrowdPFOptions Options;
 
-
-
 	//UPROPERTY(EditDefaultsOnly, Category = "Dooria")
 	//TSubclassOf<AActor> FlameFloorTrapClass;
 
